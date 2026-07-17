@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -42,6 +40,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: mobile_shop
       MYSQL_USER: mobile_user
       MYSQL_PASSWORD: secret
