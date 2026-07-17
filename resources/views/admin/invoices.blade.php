@@ -88,7 +88,7 @@
                                         </span>
                                     </div>
                                     <div class="symbol   me-5 mb-8">
-                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesThisMonth, 2) }} <span class="fs-6">AED</span></span>
+                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesThisMonth, 2) }} <span class="fs-6">USD</span></span>
                                     </div>
                                 </div>
                                 <div class=" mt-10">
@@ -108,7 +108,7 @@
                                         </span>
                                     </div>
                                     <div class="symbol   me-5 mb-8">
-                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesTillNow, 2) }} <span class="fs-6">AED</span></span>
+                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesTillNow, 2) }} <span class="fs-6">USD</span></span>
                                     </div>
                                 </div>
                                 <div class=" mt-10">
@@ -223,9 +223,9 @@
             </tbody>
         </table>
         <hr>
-        <h3>Total: <span id="print_total">0</span> AED</h3>
-        <h3>Discount: <span id="print_discount">0</span> AED</h3>
-        <h3>Final Total: <span id="print_invoice_total">0</span> AED</h3>
+        <h3>Total: <span id="print_total">0</span> USD</h3>
+        <h3>Discount: <span id="print_discount">0</span> USD</h3>
+        <h3>Final Total: <span id="print_invoice_total">0</span> USD</h3>
         <div class="text-center">
             <p>Thank you for shopping with us!</p>
         </div>
@@ -308,9 +308,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ${productsHtml}
                             </tbody>
                         </table>
-                        <h4>Total: ${parseFloat(invoice.total_bill).toFixed(2)} AED</h4>
-                        <h4>Discount: ${parseFloat(invoice.discount).toFixed(2)} AED</h4>
-                        <h4>Final Total: ${parseFloat(invoice.final_bill).toFixed(2)} AED</h4>
+                        <h4>Total: ${parseFloat(invoice.total_bill).toFixed(2)} USD</h4>
+                        <h4>Discount: ${parseFloat(invoice.discount).toFixed(2)} USD</h4>
+                        <h4>Final Total: ${parseFloat(invoice.final_bill).toFixed(2)} USD</h4>
                     `;
 
                     // Show the modal
