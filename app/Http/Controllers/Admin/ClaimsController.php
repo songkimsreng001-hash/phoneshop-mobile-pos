@@ -18,7 +18,7 @@ class ClaimsController extends Controller
                              ->exists();
 
         if (!$isAuthorized) {
-            return redirect()->route('admin.shops') // Adjust this route name as needed
+            return redirect()->route('admin.shops')
                          ->with('error' , 'Unauthorized access or shop does not exist.');
         }
         $shop = User::where('id', $shop_id)->first();

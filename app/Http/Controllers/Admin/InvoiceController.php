@@ -19,7 +19,7 @@ class InvoiceController extends Controller
                              ->exists();
 
         if (!$isAuthorized) {
-            return redirect()->route('admin.shops') // Adjust this route name as needed
+            return redirect()->route('admin.shops')
                          ->with('error' , 'Unauthorized access or shop does not exist.');
         }
         $invoices = Invoice::where('shop_id', $shop_id)

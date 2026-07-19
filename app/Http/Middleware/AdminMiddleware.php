@@ -9,17 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::guard('admin')->check() && !Auth::guard('admin')->user()->status) {
+        if (Auth::guard('admin')->check()) {
+            $admin = Auth::guard('admin')->user();
+            // status = true means blocked by super admin
+            if ($admin->status) {
+                Auth::guard('admin')->logout();
+                return redirect()->route('admin.login')->with('error', 'Your account has been blocked by the Super Admin.');
+            }
             return $next($request);
         }
 
-        return redirect()->route('admin.login')->with('error', 'Admin access required.');
+        return redirect()->route('admin.login')->with('error', 'Admin access required. Please log in.');
     }
 }
