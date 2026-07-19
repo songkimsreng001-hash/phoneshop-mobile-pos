@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Product;
-
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Supplier;
 use App\Models\ShopAdmin;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,187 +17,190 @@ class InventoryController extends Controller
     public function index($shop_id)
     {
         $rec = Auth::guard('admin')->user();
+
         $isAuthorized = ShopAdmin::where('admin_id', $rec->id)
-                             ->where('shop_id', $shop_id)
-                             ->exists();
+                                 ->where('shop_id', $shop_id)
+                                 ->exists();
 
         if (!$isAuthorized) {
-            return redirect()->route('admin.shops') // Adjust this route name as needed
-                         ->with('error' , 'Unauthorized access or shop does not exist.');
+            return redirect()->route('admin.shops')
+                             ->with('error', 'Unauthorized access or shop does not exist.');
         }
 
-        // get products that are not deleted
-        $products = Product::where('shop_id', $shop_id)->where('isDeleted', 0)->get();
+        $products = Product::where('shop_id', $shop_id)
+            ->where('isDeleted', 0)
+            ->with(['brand', 'category', 'supplier'])
+            ->get();
 
-        return view('admin.inventory', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id]);
+        $brands     = Brand::where('is_active', 1)->orderBy('name')->get();
+        $categories = Category::where('is_active', 1)->orderBy('name')->get();
+        $suppliers  = Supplier::where('is_active', 1)->orderBy('name')->get();
 
+        return view('admin.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
     }
+
     public function storeProduct(Request $request)
     {
-        // Define validation rules for updating the password
         $rules = [
-            'id' => 'required|exists:users,id',
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'description' => 'nullable|string',
-            'warranty_is_monthly' => 'required|boolean',
-            'warrenty' => 'nullable|integer|min:0',
-            'qty' => 'required|integer|min:0',
-            'sold_qty' => 'required|integer|min:0',
+            'id'               => 'required|exists:users,id',
+            'name'             => 'required|string|max:255|unique:products,name',
+            'sku'              => 'nullable|string|max:100|unique:products,sku',
+            'barcode'          => 'nullable|string|max:100',
+            'price'            => 'required|numeric|min:0',
+            'cost_price'       => 'nullable|numeric|min:0',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'description'      => 'nullable|string',
+            'warranty_unit'    => 'nullable|integer|min:0',
+            'warranty_duration'=> 'nullable|integer|min:0',
+            'qty'              => 'required|integer|min:0',
+            'sold_qty'         => 'required|integer|min:0',
+            'reorder_level'    => 'nullable|integer|min:0',
+            'brand_id'         => 'nullable|exists:brands,id',
+            'category_id'      => 'nullable|exists:categories,id',
+            'supplier_id'      => 'nullable|exists:suppliers,id',
         ];
 
-        // Create a validator instance
         $validator = Validator::make($request->all(), $rules);
 
-        // Check if validation fails
         if ($validator->fails()) {
-            // Redirect back with error messages
             return redirect()->back()->with('error', $validator->errors()->first());
         }
 
-        $shop_id = $request->id;
-        // Handle image upload if available
-        $imagePath = null;
+        $shop_id   = $request->id;
+        $imageName = null;
+
         if ($request->hasFile('image')) {
-            // Get the original file name without extension
             $originalName = pathinfo($request->file('image')->getClientOriginalName(), PATHINFO_FILENAME);
-
-            // Generate a unique file name by appending a timestamp or uniqid
-            $uniqueName = $originalName . '_' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
-
-            // Move the file to public/products/ with the unique name
-            $imagePath = $request->file('image')->move(public_path('products'), $uniqueName);
+            $imageName    = $originalName . '_' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(public_path('products'), $imageName);
         }
 
-        // Create a new product and save it to the database
         $product = new Product();
-        $product->name = $request->name;
-        $product->price = $request->price;
-        $product->shop_id = $shop_id;
-        $product->description = $request->description;
-        $product->warranty_is_monthly = $request->warranty_is_monthly;
-        $product->warrenty = $request->warrenty;
-        $product->qty = $request->qty;
-        $product->sold_qty = $request->sold_qty;
-        if ($imagePath) {
-            $product->image = $uniqueName;
+        $product->shop_id          = $shop_id;
+        $product->name             = $request->name;
+        $product->sku              = $request->sku;
+        $product->barcode          = $request->barcode;
+        $product->price            = $request->price;
+        $product->cost_price       = $request->cost_price;
+        $product->description      = $request->description;
+        $product->warranty_unit    = $request->warranty_unit;
+        $product->warranty_duration= $request->warranty_duration;
+        $product->qty              = $request->qty;
+        $product->sold_qty         = $request->sold_qty;
+        $product->reorder_level    = $request->reorder_level ?? 5;
+        $product->brand_id         = $request->brand_id;
+        $product->category_id      = $request->category_id;
+        $product->supplier_id      = $request->supplier_id;
+        if ($imageName) {
+            $product->image = $imageName;
         }
         $product->save();
 
-        $rec = Auth::guard('admin')->user();
-        $products = Product::where('shop_id', $shop_id)->where('isDeleted', 0)->get();
-
-        return redirect()->route('inventory.show', ['shop_id' => $shop_id])->with('success', 'Product added successfully.');
+        // Redirect back to this shop's inventory
+        return redirect()->route('admin.inventory.show', ['shop_id' => $shop_id])
+                         ->with('success', 'Product added successfully.');
     }
+
     public function delete(Request $request)
     {
-        // Define validation rules for deleting the product
-        $rules = [
-            'id' => 'required|exists:products,id',
-        ];
+        $rules = ['id' => 'required|exists:products,id'];
 
-        // Define custom error messages
         $messages = [
             'id.required' => 'The ID field is required.',
-            'id.exists' => 'The specified ID does not exist.',
+            'id.exists'   => 'The specified ID does not exist.',
         ];
 
-        // Create a validator instance
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        // Check if validation fails
         if ($validator->fails()) {
-            // Redirect back with error messages
             return redirect()->back()->with('error', $validator->errors()->first());
         }
 
-        $id = $request->input('id');
-
-        // Find the product by ID
-        $product = Product::find($id);
+        $product = Product::find($request->input('id'));
 
         if ($product) {
-            // Check if the product has an image and delete it if it exists
             if ($product->image) {
                 $imagePath = public_path('products/' . $product->image);
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
             }
-
-            // Turn isDeleted to true for soft delete
             $product->isDeleted = true;
             $product->save();
 
-            // Return a response (you can customize this response as needed)
             return redirect()->back()->with('success', 'Product deleted successfully.');
-        } else {
-            // Record not found
-            return redirect()->back()->with('error', 'Product not found.');
         }
+
+        return redirect()->back()->with('error', 'Product not found.');
     }
+
     public function updateProduct(Request $request)
     {
-        // Define validation rules for deleting the product
         $rules = [
-            'id' => 'required|exists:products,id',
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'description' => 'nullable|string',
-            'warranty_is_monthly' => 'required|boolean',
-            'warrenty' => 'nullable|integer|min:0',
-            'qty' => 'required|integer|min:0',
-            'sold_qty' => 'required|integer|min:0',
+            'id'               => 'required|exists:products,id',
+            'name'             => 'required|string|max:255|unique:products,name,' . $request->id,
+            'sku'              => 'nullable|string|max:100|unique:products,sku,' . $request->id,
+            'barcode'          => 'nullable|string|max:100',
+            'price'            => 'required|numeric|min:0',
+            'cost_price'       => 'nullable|numeric|min:0',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'description'      => 'nullable|string',
+            'warranty_unit'    => 'nullable|integer|min:0',
+            'warranty_duration'=> 'nullable|integer|min:0',
+            'qty'              => 'required|integer|min:0',
+            'sold_qty'         => 'required|integer|min:0',
+            'reorder_level'    => 'nullable|integer|min:0',
+            'brand_id'         => 'nullable|exists:brands,id',
+            'category_id'      => 'nullable|exists:categories,id',
+            'supplier_id'      => 'nullable|exists:suppliers,id',
         ];
 
-        // Define custom error messages
         $messages = [
             'id.required' => 'The ID field is required.',
-            'id.exists' => 'The specified ID does not exist.',
+            'id.exists'   => 'The specified ID does not exist.',
         ];
 
-        // Create a validator instance
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        // Check if validation fails
         if ($validator->fails()) {
-            // Redirect back with error messages
             return redirect()->back()->with('error', $validator->errors()->first());
         }
-        $product_id = $request->id;
-        $product = Product::find($product_id);
-        if(!$product){
+
+        $product = Product::find($request->id);
+        if (!$product) {
             return redirect()->back()->with('error', 'Product not found.');
         }
 
-        // Update product attributes
-        $product->name = $request->input('name');
-        $product->price = $request->input('price');
-        $product->description = $request->input('description');
-        $product->warranty_is_monthly = $request->input('warranty_is_monthly');
-        $product->warrenty = $request->input('warrenty');
-        $product->qty = $request->input('qty');
-        $product->sold_qty = $request->input('sold_qty');
+        $product->name             = $request->input('name');
+        $product->sku              = $request->input('sku');
+        $product->barcode          = $request->input('barcode');
+        $product->price            = $request->input('price');
+        $product->cost_price       = $request->input('cost_price');
+        $product->description      = $request->input('description');
+        $product->warranty_unit    = $request->input('warranty_unit');
+        $product->warranty_duration= $request->input('warranty_duration');
+        $product->qty              = $request->input('qty');
+        $product->sold_qty         = $request->input('sold_qty');
+        $product->reorder_level    = $request->input('reorder_level', 5);
+        $product->brand_id         = $request->input('brand_id');
+        $product->category_id      = $request->input('category_id');
+        $product->supplier_id      = $request->input('supplier_id');
 
-        // Handle image upload
         if ($request->hasFile('image')) {
             if ($product->image) {
-                $imagePath = public_path('products/' . $product->image);
-                if (file_exists($imagePath)) {
-                    unlink($imagePath);
+                $old = public_path('products/' . $product->image);
+                if (file_exists($old)) {
+                    unlink($old);
                 }
             }
-            $image = $request->file('image');
-            $imagePath = $image->store('products', 'public');
-            $product->image = $imagePath;
+            $originalName  = pathinfo($request->file('image')->getClientOriginalName(), PATHINFO_FILENAME);
+            $imageName     = $originalName . '_' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(public_path('products'), $imageName);
+            $product->image = $imageName;
         }
 
         $product->save();
 
-        return redirect()->back()->with('success', 'Product updated Successfully.');
+        return redirect()->back()->with('success', 'Product updated successfully.');
     }
-
-
 }

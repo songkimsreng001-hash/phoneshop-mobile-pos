@@ -145,8 +145,17 @@
                                                         <img src="{{ asset('products/' . $product->image) }}"
                                                             alt="{{ $product->name }}" width="100">
                                                     </td>
-                                                    <td>{{ $product->warranty_is_monthly ? 'Yes' : 'No' }}</td>
-                                                    <td>{{ $product->warrenty }}</td>
+                                                    <td>
+                                                        @if($product->warranty_duration === null || $product->warranty_duration <= 0)
+                                                            N/A
+                                                        @else
+                                                            @if($product->warranty_unit === 0) Day
+                                                            @elseif($product->warranty_unit === 1) Month
+                                                            @elseif($product->warranty_unit === 2) Year
+                                                            @else N/A @endif
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $product->warranty_duration === null || $product->warranty_duration <= 0 ? 'N/A' : $product->warranty_duration }}</td>
                                                     <td>{{ $product->qty }}</td>
                                                     <td>{{ $product->sold_qty }}</td>
 
@@ -194,7 +203,7 @@
                                                                 <!--end::Heading-->
                                                                 <!--begin::Menu item-->
                                                                 <div class="menu-item px-3">
-                                                                    <a href="javascript:edit_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_is_monthly }}', '{{ $product->warrenty }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
+                                                                    <a href="javascript:edit_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->sku ?? '' }}', '{{ $product->barcode ?? '' }}', '{{ $product->cost_price ?? '' }}', '{{ $product->brand_id ?? '' }}', '{{ $product->category_id ?? '' }}', '{{ $product->supplier_id ?? '' }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}', '{{ $product->reorder_level ?? 5 }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
                                                                         data-kt-menu-placement="bottom-end">
                                                                         <!--begin::Svg Icon | path: icons/duotune/general/gen031.svg-->
@@ -208,7 +217,7 @@
                                                                 <!--end::Menu item-->
                                                                 <!--begin::Menu item-->
                                                                 <div class="menu-item px-3">
-                                                                    <a href="javascript:view_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_is_monthly }}', '{{ $product->warrenty }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
+                                                                    <a href="javascript:view_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->sku ?? '' }}', '{{ $product->barcode ?? '' }}', '{{ $product->cost_price ?? '' }}', '{{ $product->brand_id ?? '' }}', '{{ $product->category_id ?? '' }}', '{{ $product->supplier_id ?? '' }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}', '{{ $product->reorder_level ?? 5 }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
                                                                         data-kt-menu-placement="bottom-end">
                                                                         <!--begin::Svg Icon | path: icons/duotune/general/gen031.svg-->
@@ -344,20 +353,19 @@
                             <!-- Warranty is Monthly -->
                             <div class="fv-row mb-7">
                                 <label class="fw-bold fs-6 mb-2">Is Warranty Monthly?</label>
-                                <select name="warranty_is_monthly" class="form-control form-control-solid mb-3 mb-lg-0">
-                                    <option value="0" {{ old('warranty_is_monthly') == 0 ? 'selected' : '' }}>No
-                                    </option>
-                                    <option value="1" {{ old('warranty_is_monthly') == 1 ? 'selected' : '' }}>Yes
-                                    </option>
+                                <select name="warranty_unit" class="form-control form-control-solid mb-3 mb-lg-0">
+                                    <option value="0" {{ old('warranty_unit') == 0 ? 'selected' : '' }}>Day</option>
+                                    <option value="1" {{ old('warranty_unit') == 1 ? 'selected' : '' }}>Month</option>
+                                    <option value="2" {{ old('warranty_unit') == 2 ? 'selected' : '' }}>Year</option>
                                 </select>
                             </div>
 
                             <!-- Warranty Period -->
                             <div class="fv-row mb-7">
                                 <label class="fw-bold fs-6 mb-2">Warranty Period (Months)</label>
-                                <input type="number" name="warrenty"
+                                <input type="number" name="warranty_duration"
                                     class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Warranty Period"
-                                    value="{{ old('warrenty') }}">
+                                    value="{{ old('warranty_duration') }}">
                             </div>
 
                             <!-- Quantity -->
@@ -558,16 +566,17 @@
                             <!-- Warranty is Monthly -->
                             <div class="mb-3">
                                 <label for="editWarrantyIsMonthly" class="form-label">Is Warranty Monthly?</label>
-                                <select class="form-control" id="editWarrantyIsMonthly" name="warranty_is_monthly">
-                                    <option value="0">No</option>
-                                    <option value="1">Yes</option>
+                                <select class="form-control" id="editWarrantyIsMonthly" name="warranty_unit">
+                                    <option value="0">Day</option>
+                                    <option value="1">Month</option>
+                                    <option value="2">Year</option>
                                 </select>
                             </div>
 
                             <!-- Warranty Period -->
                             <div class="mb-3">
                                 <label for="editWarranty" class="form-label">Warranty Period (Months)</label>
-                                <input type="number" class="form-control" id="editWarranty" name="warrenty">
+                                <input type="number" class="form-control" id="editWarranty" name="warranty_duration">
                             </div>
 
                             <!-- Quantity -->
@@ -713,13 +722,13 @@
             $("#add_modal").modal('show');
         }
 
-        function view_modal(product_id, name, price, description, warranty_is_monthly, warrenty, qty, sold_qty, imageUrl) {
+        function view_modal(product_id, name, sku, barcode, cost_price, brand_id, category_id, supplier_id, price, description, warranty_unit, warranty_duration, qty, sold_qty, reorder_level, imageUrl) {
             // Populate view modal fields with provided values
             document.getElementById('viewName').textContent = name;
             document.getElementById('viewPrice').textContent = `$${price}`;
             document.getElementById('viewDescription').textContent = description;
-            document.getElementById('viewWarrantyIsMonthly').textContent = warranty_is_monthly ? 'Yes' : 'No';
-            document.getElementById('viewWarranty').textContent = warrenty || 'N/A';
+            document.getElementById('viewWarrantyIsMonthly').textContent = warranty_duration <= 0 ? 'N/A' : (warranty_unit == 0 ? 'Day' : warranty_unit == 1 ? 'Month' : 'Year');
+            document.getElementById('viewWarranty').textContent = warranty_duration || 'N/A';
             document.getElementById('viewQty').textContent = qty;
             document.getElementById('viewSoldQty').textContent = sold_qty;
 
@@ -740,15 +749,15 @@
 
 
 
-        function edit_modal(product_id, name, price, description, warranty_is_monthly, warrenty, qty, sold_qty, imageUrl) {
+        function edit_modal(product_id, name, sku, barcode, cost_price, brand_id, category_id, supplier_id, price, description, warranty_unit, warranty_duration, qty, sold_qty, reorder_level, imageUrl) {
             // Set the product ID and shop ID
             $('#edit_id').val(product_id);
             // Populate form fields with provided values
             document.getElementById('editName').value = name;
             document.getElementById('editPrice').value = price;
             document.getElementById('editDescription').value = description;
-            document.getElementById('editWarrantyIsMonthly').value = warranty_is_monthly;
-            document.getElementById('editWarranty').value = warrenty;
+            document.getElementById('editWarrantyIsMonthly').value = warranty_unit;
+            document.getElementById('editWarranty').value = warranty_duration;
             document.getElementById('editQty').value = qty;
             document.getElementById('editSoldQty').value = sold_qty;
 

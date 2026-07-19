@@ -10,7 +10,8 @@ services:
     volumes:
       - ./:/var/www/html
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 3306
@@ -50,6 +51,12 @@ services:
       - dbdata:/var/lib/mysql
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -63,7 +70,8 @@ services:
       PMA_USER: root
       PMA_PASSWORD: root
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
