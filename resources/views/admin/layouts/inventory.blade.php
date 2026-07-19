@@ -1,5 +1,5 @@
-@extends('shop.layouts.main')
-@extends('shop.layouts.top_bar')
+@extends('admin.layouts.main')
+@extends('admin.layouts.top_bar')
 @section('page_title', 'Inventory')
 
 @section('header_styles')
@@ -35,7 +35,7 @@
                 <ul class="breadcrumb breadcrumb-dot fw-bold text-gray-600 fs-7 my-1">
                     <!--begin::Item-->
                     <li class="breadcrumb-item text-gray-600">
-                        <a href="{{ url('/shop/dashboard') }}" class="text-gray-600 text-hover-primary">Dashboard</a>
+                        <a href="{{ url('/admin-panel/dashboard') }}" class="text-gray-600 text-hover-primary">Dashboard</a>
                     </li>
                     <!--end::Item-->
                     <!--begin::Item-->
@@ -79,7 +79,6 @@
                         <h1 class="fw-bolder my-2">Products
                         </h1>
                         <!--end::Heading-->
-
                     </div>
                     <!--end::Toolbar-->
 
@@ -104,7 +103,7 @@
                                         <!--end::Search-->
                                         
                                     </div>
-                                   
+                                
                                 </div>
                                 <div class="card-body">
                                     <table class="table align-middle border rounded table-row-dashed fs-6 g-5"
@@ -116,8 +115,8 @@
                                                 <th class="min-w-100px">Name</th>
                                                 <th class="min-w-100px">Price</th>
                                                 <th class="min-w-100px">Image</th>
+                                                <th class="min-w-100px">Warranty (Monthly)</th>
                                                 <th class="min-w-100px">Warranty Period</th>
-                                                <th class="min-w-100px">Warranty Unit</th>
                                                 <th class="min-w-100px">Quantity</th>
                                                 <th class="min-w-100px">Sold Quantity</th>
                                                 <th class="min-w-100px pe-5">Actions</th>
@@ -146,25 +145,8 @@
                                                         <img src="{{ asset('products/' . $product->image) }}"
                                                             alt="{{ $product->name }}" width="100">
                                                     </td>
-                                                    <td>
-                                                        {{ $product->warranty_duration === null || $product->warranty_duration <= 0 ? 'N/A' : $product->warranty_duration }}
-                                                    </td>
-                                                    <td>
-                                                        @if($product->warranty_duration === null || $product->warranty_duration <= 0)
-                                                            N/A
-                                                        @else
-                                                            @if($product->warranty_unit === 0)
-                                                                Day
-                                                            @elseif($product->warranty_unit === 1)
-                                                                Month
-                                                            @elseif($product->warranty_unit === 2)
-                                                                Year
-                                                            @else
-                                                                N/A
-                                                            @endif
-                                                        @endif
-                                                    </td>
-                                                    
+                                                    <td>{{ $product->warranty_is_monthly ? 'Yes' : 'No' }}</td>
+                                                    <td>{{ $product->warrenty }}</td>
                                                     <td>{{ $product->qty }}</td>
                                                     <td>{{ $product->sold_qty }}</td>
 
@@ -212,7 +194,7 @@
                                                                 <!--end::Heading-->
                                                                 <!--begin::Menu item-->
                                                                 <div class="menu-item px-3">
-                                                                    <a href="javascript:edit_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->sku ?? '' }}', '{{ $product->barcode ?? '' }}', '{{ $product->price }}', '{{ $product->cost_price ?? '' }}', '{{ $product->brand_id ?? '' }}', '{{ $product->category_id ?? '' }}', '{{ $product->supplier_id ?? '' }}', '{{ $product->description }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ $product->reorder_level ?? 5 }}', '{{ asset('products/' . $product->image) }}');"
+                                                                    <a href="javascript:edit_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_is_monthly }}', '{{ $product->warrenty }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
                                                                         data-kt-menu-placement="bottom-end">
                                                                         <!--begin::Svg Icon | path: icons/duotune/general/gen031.svg-->
@@ -226,7 +208,7 @@
                                                                 <!--end::Menu item-->
                                                                 <!--begin::Menu item-->
                                                                 <div class="menu-item px-3">
-                                                                    <a href="javascript:view_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
+                                                                    <a href="javascript:view_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_is_monthly }}', '{{ $product->warrenty }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
                                                                         data-kt-menu-placement="bottom-end">
                                                                         <!--begin::Svg Icon | path: icons/duotune/general/gen031.svg-->
@@ -319,7 +301,7 @@
                 <div class="modal-body">
 
                     <!--begin::Form-->
-                    <form class="form" method="post" action="{{ url('shop/storeProduct') }}"
+                    <form class="form" method="post" action="{{ url('admin-panel/shops/storeProduct') }}"
                         enctype="multipart/form-data" id="form_insert">
                         @csrf
 
@@ -329,134 +311,69 @@
                             data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_user_header"
                             data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
 
-                            <div class="row">
-                                <!-- Product Name -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2">Product Name</label>
-                                    <input required type="text" name="name"
-                                        class="form-control form-control-solid" placeholder="Product Name"
-                                        value="{{ old('name') }}">
-                                </div>
 
-                                <!-- SKU -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">SKU</label>
-                                    <input type="text" name="sku"
-                                        class="form-control form-control-solid" placeholder="e.g. PHONE-APPLE-001"
-                                        value="{{ old('sku') }}">
-                                </div>
+                            <!-- Product Name -->
+                            <div class="fv-row mb-7">
+                                <label class="required fw-bold fs-6 mb-2">Product Name</label>
+                                <input required type="text" name="name"
+                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Product Name"
+                                    value="{{ old('name') }}">
+                            </div>
 
-                                <!-- Barcode -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Barcode</label>
-                                    <input type="text" name="barcode"
-                                        class="form-control form-control-solid" placeholder="Barcode"
-                                        value="{{ old('barcode') }}">
-                                </div>
+                            <!-- Product Price -->
+                            <div class="fv-row mb-7">
+                                <label class="required fw-bold fs-6 mb-2">Product Price</label>
+                                <input required type="number" step="0.01" name="price"
+                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Price"
+                                    value="{{ old('price') }}">
+                            </div>
 
-                                <!-- Selling Price -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2">Selling Price</label>
-                                    <input required type="number" step="0.01" name="price"
-                                        class="form-control form-control-solid" placeholder="Price"
-                                        value="{{ old('price') }}">
-                                </div>
+                            <!-- Product Image -->
+                            <div class="fv-row mb-7">
+                                <label class="fw-bold fs-6 mb-2">Product Image</label>
+                                <input type="file" name="image"
+                                    class="form-control form-control-solid mb-3 mb-lg-0">
+                            </div>
 
-                                <!-- Cost Price -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Cost Price</label>
-                                    <input type="number" step="0.01" name="cost_price"
-                                        class="form-control form-control-solid" placeholder="Cost Price"
-                                        value="{{ old('cost_price') }}">
-                                </div>
+                            <!-- Description -->
+                            <div class="fv-row mb-7">
+                                <label class="fw-bold fs-6 mb-2">Description</label>
+                                <textarea name="description" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Description">{{ old('description') }}</textarea>
+                            </div>
 
-                                <!-- Brand -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Brand</label>
-                                    <select name="brand_id" class="form-control form-control-solid">
-                                        <option value="">-- Select Brand --</option>
-                                        @foreach($brands as $brand)
-                                            <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <!-- Warranty is Monthly -->
+                            <div class="fv-row mb-7">
+                                <label class="fw-bold fs-6 mb-2">Is Warranty Monthly?</label>
+                                <select name="warranty_is_monthly" class="form-control form-control-solid mb-3 mb-lg-0">
+                                    <option value="0" {{ old('warranty_is_monthly') == 0 ? 'selected' : '' }}>No
+                                    </option>
+                                    <option value="1" {{ old('warranty_is_monthly') == 1 ? 'selected' : '' }}>Yes
+                                    </option>
+                                </select>
+                            </div>
 
-                                <!-- Category -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Category</label>
-                                    <select name="category_id" class="form-control form-control-solid">
-                                        <option value="">-- Select Category --</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <!-- Warranty Period -->
+                            <div class="fv-row mb-7">
+                                <label class="fw-bold fs-6 mb-2">Warranty Period (Months)</label>
+                                <input type="number" name="warrenty"
+                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Warranty Period"
+                                    value="{{ old('warrenty') }}">
+                            </div>
 
-                                <!-- Supplier -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Supplier</label>
-                                    <select name="supplier_id" class="form-control form-control-solid">
-                                        <option value="">-- Select Supplier --</option>
-                                        @foreach($suppliers as $supplier)
-                                            <option value="{{ $supplier->id }}" {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <!-- Quantity -->
+                            <div class="fv-row mb-7">
+                                <label class="required fw-bold fs-6 mb-2">Quantity</label>
+                                <input required type="number" name="qty"
+                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Quantity"
+                                    value="{{ old('qty') }}">
+                            </div>
 
-                                <!-- Product Image -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Product Image</label>
-                                    <input type="file" name="image"
-                                        class="form-control form-control-solid">
-                                </div>
-
-                                <!-- Description -->
-                                <div class="col-12 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Description</label>
-                                    <textarea name="description" class="form-control form-control-solid" placeholder="Description">{{ old('description') }}</textarea>
-                                </div>
-
-                                <!-- Warranty Unit -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Warranty Unit</label>
-                                    <select name="warranty_unit" class="form-control form-control-solid">
-                                        <option value="0" {{ old('warranty_unit') == 0 ? 'selected' : '' }}>Day</option>
-                                        <option value="1" {{ old('warranty_unit') == 1 ? 'selected' : '' }}>Month</option>
-                                        <option value="2" {{ old('warranty_unit') == 2 ? 'selected' : '' }}>Year</option>
-                                    </select>
-                                </div>
-
-                                <!-- Warranty Period -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Warranty Period</label>
-                                    <input type="number" name="warranty_duration"
-                                        class="form-control form-control-solid" placeholder="Warranty Period"
-                                        value="{{ old('warranty_duration') }}">
-                                </div>
-
-                                <!-- Quantity -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2">Quantity</label>
-                                    <input required type="number" name="qty"
-                                        class="form-control form-control-solid" placeholder="Quantity"
-                                        value="{{ old('qty') }}">
-                                </div>
-
-                                <!-- Sold Quantity -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2">Sold Quantity</label>
-                                    <input required type="number" name="sold_qty"
-                                        class="form-control form-control-solid" placeholder="Sold Quantity"
-                                        value="{{ old('sold_qty', 0) }}">
-                                </div>
-
-                                <!-- Reorder Level -->
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-bold fs-6 mb-2">Reorder Level</label>
-                                    <input type="number" name="reorder_level"
-                                        class="form-control form-control-solid" placeholder="Low-stock alert (default: 5)"
-                                        value="{{ old('reorder_level', 5) }}">
-                                </div>
+                            <!-- Sold Quantity -->
+                            <div class="fv-row mb-7">
+                                <label class="required fw-bold fs-6 mb-2">Sold Quantity</label>
+                                <input required type="number" name="sold_qty"
+                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Sold Quantity"
+                                    value="{{ old('sold_qty', 0) }}">
                             </div>
 
                         </div>
@@ -542,13 +459,13 @@
 
                     <!-- Warranty is Monthly -->
                     <div class="mb-3">
-                        <label class="form-label">Warranty Unit</label>
+                        <label class="form-label">Is Warranty Monthly?</label>
                         <p id="viewWarrantyIsMonthly" class="form-control-plaintext"></p>
                     </div>
 
                     <!-- Warranty Period -->
                     <div class="mb-3">
-                        <label class="form-label">Warranty Period</label>
+                        <label class="form-label">Warranty Period (Months)</label>
                         <p id="viewWarranty" class="form-control-plaintext"></p>
                     </div>
 
@@ -601,7 +518,7 @@
                 <div class="modal-body">
 
                     <!--begin::Form-->
-                    <form class="form" method="post" action="{{ url('shop/updateProduct') }}"
+                    <form class="form" method="post" action="{{ url('admin-panel/shops/updateProduct') }}"
                         enctype="multipart/form-data" id="edit_form">
                         @csrf
 
@@ -611,117 +528,58 @@
                             data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_user_header"
                             data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
 
-                            <div class="row">
-                                <!-- Product Name -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editName" class="form-label">Product Name</label>
-                                    <input type="text" class="form-control" id="editName" name="name" required>
-                                </div>
+                            <!-- Product Name -->
+                            <div class="mb-3">
+                                <label for="editName" class="form-label">Product Name</label>
+                                <input type="text" class="form-control" id="editName" name="name" required>
+                            </div>
 
-                                <!-- SKU -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editSku" class="form-label">SKU</label>
-                                    <input type="text" class="form-control" id="editSku" name="sku">
-                                </div>
+                            <!-- Product Price -->
+                            <div class="mb-3">
+                                <label for="editPrice" class="form-label">Product Price</label>
+                                <input type="number" class="form-control" id="editPrice" name="price" step="0.01"
+                                    required>
+                            </div>
 
-                                <!-- Barcode -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editBarcode" class="form-label">Barcode</label>
-                                    <input type="text" class="form-control" id="editBarcode" name="barcode">
-                                </div>
+                            <!-- Product Image -->
+                            <div class="mb-3">
+                                <label for="editImage" class="form-label">Product Image</label>
+                                <input type="file" class="form-control" id="editImage" name="image">
+                                <img id="editImagePreview" src="" class="img-fluid mt-2"
+                                    style="max-width: 200px;" alt="Product Image">
+                            </div>
 
-                                <!-- Selling Price -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editPrice" class="form-label">Selling Price</label>
-                                    <input type="number" class="form-control" id="editPrice" name="price" step="0.01" required>
-                                </div>
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="editDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="editDescription" name="description"></textarea>
+                            </div>
 
-                                <!-- Cost Price -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editCostPrice" class="form-label">Cost Price</label>
-                                    <input type="number" class="form-control" id="editCostPrice" name="cost_price" step="0.01">
-                                </div>
+                            <!-- Warranty is Monthly -->
+                            <div class="mb-3">
+                                <label for="editWarrantyIsMonthly" class="form-label">Is Warranty Monthly?</label>
+                                <select class="form-control" id="editWarrantyIsMonthly" name="warranty_is_monthly">
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
 
-                                <!-- Brand -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editBrandId" class="form-label">Brand</label>
-                                    <select class="form-control" id="editBrandId" name="brand_id">
-                                        <option value="">-- Select Brand --</option>
-                                        @foreach($brands as $brand)
-                                            <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <!-- Warranty Period -->
+                            <div class="mb-3">
+                                <label for="editWarranty" class="form-label">Warranty Period (Months)</label>
+                                <input type="number" class="form-control" id="editWarranty" name="warrenty">
+                            </div>
 
-                                <!-- Category -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editCategoryId" class="form-label">Category</label>
-                                    <select class="form-control" id="editCategoryId" name="category_id">
-                                        <option value="">-- Select Category --</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <!-- Quantity -->
+                            <div class="mb-3">
+                                <label for="editQty" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="editQty" name="qty" required>
+                            </div>
 
-                                <!-- Supplier -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editSupplierId" class="form-label">Supplier</label>
-                                    <select class="form-control" id="editSupplierId" name="supplier_id">
-                                        <option value="">-- Select Supplier --</option>
-                                        @foreach($suppliers as $supplier)
-                                            <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Product Image -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editImage" class="form-label">Product Image</label>
-                                    <input type="file" class="form-control" id="editImage" name="image">
-                                    <img id="editImagePreview" src="" class="img-fluid mt-2"
-                                        style="max-width: 200px;" alt="Product Image">
-                                </div>
-
-                                <!-- Description -->
-                                <div class="col-12 mb-3">
-                                    <label for="editDescription" class="form-label">Description</label>
-                                    <textarea class="form-control" id="editDescription" name="description"></textarea>
-                                </div>
-
-                                <!-- Warranty Unit -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editWarrantyIsMonthly" class="form-label">Warranty Unit</label>
-                                    <select class="form-control" id="editWarrantyIsMonthly" name="warranty_unit">
-                                        <option value="0">Day</option>
-                                        <option value="1">Month</option>
-                                        <option value="2">Year</option>
-                                    </select>
-                                </div>
-
-                                <!-- Warranty Period -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editWarranty" class="form-label">Warranty Period</label>
-                                    <input type="number" class="form-control" id="editWarranty" name="warranty_duration">
-                                </div>
-
-                                <!-- Quantity -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editQty" class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" id="editQty" name="qty" required>
-                                </div>
-
-                                <!-- Sold Quantity -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editSoldQty" class="form-label">Sold Quantity</label>
-                                    <input type="number" class="form-control" id="editSoldQty" name="sold_qty" required>
-                                </div>
-
-                                <!-- Reorder Level -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="editReorderLevel" class="form-label">Reorder Level</label>
-                                    <input type="number" class="form-control" id="editReorderLevel" name="reorder_level">
-                                </div>
+                            <!-- Sold Quantity -->
+                            <div class="mb-3">
+                                <label for="editSoldQty" class="form-label">Sold Quantity</label>
+                                <input type="number" class="form-control" id="editSoldQty" name="sold_qty" required>
                             </div>
 
                         </div>
@@ -780,7 +638,7 @@
                 <div class="modal-body">
 
                     <!--begin::Form-->
-                    <form class="form" method="post" action="{{ url('shop/deleteProduct') }}"
+                    <form class="form" method="post" action="{{ url('admin-panel/shops/deleteProduct') }}"
                         enctype="multipart/form-data" id="form_delete">
                         @csrf
                         <!--begin::Scroll-->
@@ -855,22 +713,13 @@
             $("#add_modal").modal('show');
         }
 
-        function view_modal(product_id, name, price, description, warranty_unit, warranty_duration, qty, sold_qty, imageUrl) {
+        function view_modal(product_id, name, price, description, warranty_is_monthly, warrenty, qty, sold_qty, imageUrl) {
             // Populate view modal fields with provided values
             document.getElementById('viewName').textContent = name;
             document.getElementById('viewPrice').textContent = `$${price}`;
             document.getElementById('viewDescription').textContent = description;
-            document.getElementById('viewWarrantyIsMonthly').textContent = 
-                warranty_duration === null || warranty_duration <= 0 
-                    ? 'N/A' 
-                    : warranty_unit == 0 
-                        ? 'Day' 
-                        : warranty_unit == 1 
-                            ? 'Month' 
-                            : warranty_unit == 2 
-                                ? 'Year' 
-                                : 'N/A';
-            document.getElementById('viewWarranty').textContent = warranty_duration || 'N/A';
+            document.getElementById('viewWarrantyIsMonthly').textContent = warranty_is_monthly ? 'Yes' : 'No';
+            document.getElementById('viewWarranty').textContent = warrenty || 'N/A';
             document.getElementById('viewQty').textContent = qty;
             document.getElementById('viewSoldQty').textContent = sold_qty;
 
@@ -891,32 +740,32 @@
 
 
 
-        function edit_modal(product_id, name, sku, barcode, price, cost_price, brand_id, category_id, supplier_id, description, warranty_unit, warranty_duration, qty, sold_qty, reorder_level, imageUrl) {
+        function edit_modal(product_id, name, price, description, warranty_is_monthly, warrenty, qty, sold_qty, imageUrl) {
+            // Set the product ID and shop ID
             $('#edit_id').val(product_id);
+            // Populate form fields with provided values
             document.getElementById('editName').value = name;
-            document.getElementById('editSku').value = sku;
-            document.getElementById('editBarcode').value = barcode;
             document.getElementById('editPrice').value = price;
-            document.getElementById('editCostPrice').value = cost_price;
-            document.getElementById('editBrandId').value = brand_id;
-            document.getElementById('editCategoryId').value = category_id;
-            document.getElementById('editSupplierId').value = supplier_id;
             document.getElementById('editDescription').value = description;
-            document.getElementById('editWarrantyIsMonthly').value = warranty_unit;
-            document.getElementById('editWarranty').value = warranty_duration;
+            document.getElementById('editWarrantyIsMonthly').value = warranty_is_monthly;
+            document.getElementById('editWarranty').value = warrenty;
             document.getElementById('editQty').value = qty;
             document.getElementById('editSoldQty').value = sold_qty;
-            document.getElementById('editReorderLevel').value = reorder_level;
 
+            // Handle image preview
+            const imageInput = document.getElementById('editImage');
             const imagePreview = document.getElementById('editImagePreview');
+
             if (imageUrl) {
-                imagePreview.src = imageUrl;
+                imagePreview.src = imageUrl; // Set the image URL in the preview
                 imagePreview.style.display = 'block';
             } else {
-                imagePreview.src = '';
+                imagePreview.src = ''; // Clear the preview if no image URL
                 imagePreview.style.display = 'none';
             }
 
+
+            // Show the modal
             $("#edit_modal").modal('show');
         }
 

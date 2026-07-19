@@ -1,5 +1,5 @@
-@extends('superadmin.layouts.main')
-@extends('superadmin.layouts.top_bar')
+@extends('shop.layouts.main')
+@extends('shop.layouts.top_bar')
 @section('page_title', 'Inventory')
 
 @section('header_styles')
@@ -35,7 +35,7 @@
                 <ul class="breadcrumb breadcrumb-dot fw-bold text-gray-600 fs-7 my-1">
                     <!--begin::Item-->
                     <li class="breadcrumb-item text-gray-600">
-                        <a href="{{ url('/admin-panel/dashboard') }}" class="text-gray-600 text-hover-primary">Dashboard</a>
+                        <a href="{{ url('/shop/dashboard') }}" class="text-gray-600 text-hover-primary">Dashboard</a>
                     </li>
                     <!--end::Item-->
                     <!--begin::Item-->
@@ -104,7 +104,7 @@
                                         <!--end::Search-->
                                         
                                     </div>
-                                    
+                                   
                                 </div>
                                 <div class="card-body">
                                     <table class="table align-middle border rounded table-row-dashed fs-6 g-5"
@@ -116,8 +116,8 @@
                                                 <th class="min-w-100px">Name</th>
                                                 <th class="min-w-100px">Price</th>
                                                 <th class="min-w-100px">Image</th>
-                                                <th class="min-w-100px">Warranty (Monthly)</th>
                                                 <th class="min-w-100px">Warranty Period</th>
+                                                <th class="min-w-100px">Warranty Unit</th>
                                                 <th class="min-w-100px">Quantity</th>
                                                 <th class="min-w-100px">Sold Quantity</th>
                                                 <th class="min-w-100px pe-5">Actions</th>
@@ -147,16 +147,24 @@
                                                             alt="{{ $product->name }}" width="100">
                                                     </td>
                                                     <td>
+                                                        {{ $product->warranty_duration === null || $product->warranty_duration <= 0 ? 'N/A' : $product->warranty_duration }}
+                                                    </td>
+                                                    <td>
                                                         @if($product->warranty_duration === null || $product->warranty_duration <= 0)
                                                             N/A
                                                         @else
-                                                            @if($product->warranty_unit === 0) Day
-                                                            @elseif($product->warranty_unit === 1) Month
-                                                            @elseif($product->warranty_unit === 2) Year
-                                                            @else N/A @endif
+                                                            @if($product->warranty_unit === 0)
+                                                                Day
+                                                            @elseif($product->warranty_unit === 1)
+                                                                Month
+                                                            @elseif($product->warranty_unit === 2)
+                                                                Year
+                                                            @else
+                                                                N/A
+                                                            @endif
                                                         @endif
                                                     </td>
-                                                    <td>{{ $product->warranty_duration === null || $product->warranty_duration <= 0 ? 'N/A' : $product->warranty_duration }}</td>
+                                                    
                                                     <td>{{ $product->qty }}</td>
                                                     <td>{{ $product->sold_qty }}</td>
 
@@ -204,7 +212,7 @@
                                                                 <!--end::Heading-->
                                                                 <!--begin::Menu item-->
                                                                 <div class="menu-item px-3">
-                                                                    <a href="javascript:edit_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->sku ?? '' }}', '{{ $product->barcode ?? '' }}', '{{ $product->cost_price ?? '' }}', '{{ $product->brand_id ?? '' }}', '{{ $product->category_id ?? '' }}', '{{ $product->supplier_id ?? '' }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}', '{{ $product->reorder_level ?? 5 }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
+                                                                    <a href="javascript:edit_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
                                                                         data-kt-menu-placement="bottom-end">
                                                                         <!--begin::Svg Icon | path: icons/duotune/general/gen031.svg-->
@@ -218,7 +226,7 @@
                                                                 <!--end::Menu item-->
                                                                 <!--begin::Menu item-->
                                                                 <div class="menu-item px-3">
-                                                                    <a href="javascript:view_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->sku ?? '' }}', '{{ $product->barcode ?? '' }}', '{{ $product->cost_price ?? '' }}', '{{ $product->brand_id ?? '' }}', '{{ $product->category_id ?? '' }}', '{{ $product->supplier_id ?? '' }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}', '{{ $product->reorder_level ?? 5 }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
+                                                                    <a href="javascript:view_modal('{{ $product->id }}', '{{ $product->name }}', '{{ $product->price }}', '{{ $product->description }}', '{{ $product->warranty_unit }}', '{{ $product->warranty_duration }}','{{ $product->qty }}', '{{ $product->sold_qty }}', '{{ asset('products/' . $product->image) }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
                                                                         data-kt-menu-placement="bottom-end">
                                                                         <!--begin::Svg Icon | path: icons/duotune/general/gen031.svg-->
@@ -311,7 +319,7 @@
                 <div class="modal-body">
 
                     <!--begin::Form-->
-                    <form class="form" method="post" action="{{ url('admin-panel/shops/storeProduct') }}"
+                    <form class="form" method="post" action="{{ url('shop/storeProduct') }}"
                         enctype="multipart/form-data" id="form_insert">
                         @csrf
 
@@ -351,19 +359,22 @@
                                 <textarea name="description" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Description">{{ old('description') }}</textarea>
                             </div>
 
-                            <!-- Warranty is Monthly -->
+                            <!-- Warranty Unit -->
                             <div class="fv-row mb-7">
-                                <label class="fw-bold fs-6 mb-2">Is Warranty Monthly?</label>
+                                <label class="fw-bold fs-6 mb-2">Warranty Unit</label>
                                 <select name="warranty_unit" class="form-control form-control-solid mb-3 mb-lg-0">
-                                    <option value="0" {{ old('warranty_unit') == 0 ? 'selected' : '' }}>Day</option>
-                                    <option value="1" {{ old('warranty_unit') == 1 ? 'selected' : '' }}>Month</option>
-                                    <option value="2" {{ old('warranty_unit') == 2 ? 'selected' : '' }}>Year</option>
+                                    <option value="0" {{ old('warranty_unit') == 0 ? 'selected' : '' }}>Day
+                                    </option>
+                                    <option value="1" {{ old('warranty_unit') == 1 ? 'selected' : '' }}>Month
+                                    </option>
+                                    <option value="2" {{ old('warranty_unit') == 2 ? 'selected' : '' }}>Year
+                                    </option>
                                 </select>
                             </div>
 
                             <!-- Warranty Period -->
                             <div class="fv-row mb-7">
-                                <label class="fw-bold fs-6 mb-2">Warranty Period (Months)</label>
+                                <label class="fw-bold fs-6 mb-2">Warranty Period</label>
                                 <input type="number" name="warranty_duration"
                                     class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Warranty Period"
                                     value="{{ old('warranty_duration') }}">
@@ -468,13 +479,13 @@
 
                     <!-- Warranty is Monthly -->
                     <div class="mb-3">
-                        <label class="form-label">Is Warranty Monthly?</label>
+                        <label class="form-label">Warranty Unit</label>
                         <p id="viewWarrantyIsMonthly" class="form-control-plaintext"></p>
                     </div>
 
                     <!-- Warranty Period -->
                     <div class="mb-3">
-                        <label class="form-label">Warranty Period (Months)</label>
+                        <label class="form-label">Warranty Period</label>
                         <p id="viewWarranty" class="form-control-plaintext"></p>
                     </div>
 
@@ -527,7 +538,7 @@
                 <div class="modal-body">
 
                     <!--begin::Form-->
-                    <form class="form" method="post" action="{{ url('admin-panel/shops/updateProduct') }}"
+                    <form class="form" method="post" action="{{ url('shop/updateProduct') }}"
                         enctype="multipart/form-data" id="edit_form">
                         @csrf
 
@@ -566,7 +577,7 @@
 
                             <!-- Warranty is Monthly -->
                             <div class="mb-3">
-                                <label for="editWarrantyIsMonthly" class="form-label">Is Warranty Monthly?</label>
+                                <label for="editWarrantyIsMonthly" class="form-label">Warranty Unit</label>
                                 <select class="form-control" id="editWarrantyIsMonthly" name="warranty_unit">
                                     <option value="0">Day</option>
                                     <option value="1">Month</option>
@@ -576,7 +587,7 @@
 
                             <!-- Warranty Period -->
                             <div class="mb-3">
-                                <label for="editWarranty" class="form-label">Warranty Period (Months)</label>
+                                <label for="editWarranty" class="form-label">Warranty Period</label>
                                 <input type="number" class="form-control" id="editWarranty" name="warranty_duration">
                             </div>
 
@@ -648,7 +659,7 @@
                 <div class="modal-body">
 
                     <!--begin::Form-->
-                    <form class="form" method="post" action="{{ url('admin-panel/shops/deleteProduct') }}"
+                    <form class="form" method="post" action="{{ url('shop/deleteProduct') }}"
                         enctype="multipart/form-data" id="form_delete">
                         @csrf
                         <!--begin::Scroll-->
@@ -723,12 +734,21 @@
             $("#add_modal").modal('show');
         }
 
-        function view_modal(product_id, name, sku, barcode, cost_price, brand_id, category_id, supplier_id, price, description, warranty_unit, warranty_duration, qty, sold_qty, reorder_level, imageUrl) {
+        function view_modal(product_id, name, price, description, warranty_unit, warranty_duration, qty, sold_qty, imageUrl) {
             // Populate view modal fields with provided values
             document.getElementById('viewName').textContent = name;
             document.getElementById('viewPrice').textContent = `$${price}`;
             document.getElementById('viewDescription').textContent = description;
-            document.getElementById('viewWarrantyIsMonthly').textContent = warranty_duration <= 0 ? 'N/A' : (warranty_unit == 0 ? 'Day' : warranty_unit == 1 ? 'Month' : 'Year');
+            document.getElementById('viewWarrantyIsMonthly').textContent = 
+                warranty_duration === null || warranty_duration <= 0 
+                    ? 'N/A' 
+                    : warranty_unit == 0 
+                        ? 'Day' 
+                        : warranty_unit == 1 
+                            ? 'Month' 
+                            : warranty_unit == 2 
+                                ? 'Year' 
+                                : 'N/A';
             document.getElementById('viewWarranty').textContent = warranty_duration || 'N/A';
             document.getElementById('viewQty').textContent = qty;
             document.getElementById('viewSoldQty').textContent = sold_qty;
@@ -750,7 +770,7 @@
 
 
 
-        function edit_modal(product_id, name, sku, barcode, cost_price, brand_id, category_id, supplier_id, price, description, warranty_unit, warranty_duration, qty, sold_qty, reorder_level, imageUrl) {
+        function edit_modal(product_id, name, price, description, warranty_unit, warranty_duration, qty, sold_qty, imageUrl) {
             // Set the product ID and shop ID
             $('#edit_id').val(product_id);
             // Populate form fields with provided values
@@ -773,7 +793,6 @@
                 imagePreview.src = ''; // Clear the preview if no image URL
                 imagePreview.style.display = 'none';
             }
-
 
             // Show the modal
             $("#edit_modal").modal('show');
