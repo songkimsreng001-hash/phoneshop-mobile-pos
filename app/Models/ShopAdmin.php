@@ -7,12 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ShopAdmin extends Model
 {
-    use HasFactory;
-    use HasFactory;
+    use HasFactory;  // FIX: removed duplicate 'use HasFactory'
 
     protected $guarded = [];
 
-    // Define relationships if necessary
     public function shop()
     {
         return $this->belongsTo(User::class, 'shop_id');

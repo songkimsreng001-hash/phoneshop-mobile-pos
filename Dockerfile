@@ -24,7 +24,7 @@ WORKDIR /var/www/html
 
 # Copy composer files first to leverage cache
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader || true
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Copy the rest of the application
 COPY . .
