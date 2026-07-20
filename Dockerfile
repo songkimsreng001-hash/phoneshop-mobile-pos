@@ -1,35 +1,37 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
+    curl \
+    zip \
     unzip \
     libzip-dev \
     libpng-dev \
-    libjpeg-dev \
+    libjpeg62-turbo-dev \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     libicu-dev \
-    zlib1g-dev \
-    curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql zip mbstring exif pcntl bcmath gd intl xml \
-    && rm -rf /var/lib/apt/lists/*
+    libpq-dev \
+    default-mysql-client \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && docker-php-ext-install \
+        pdo_mysql \
+        mysqli \
+        gd \
+        zip \
+        intl \
+        bcmath \
+        exif \
+        opcache
 
-# Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files first to leverage cache
-COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# Copy the rest of the application
-COPY . .
-
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 9000
 

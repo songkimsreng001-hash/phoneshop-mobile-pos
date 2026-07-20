@@ -14,10 +14,12 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        SuperAdmin::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@dashboard.com',
-            'password' => Hash::make('Admin@123!'),
-        ]);
+        SuperAdmin::updateOrCreate(
+            ['email' => 'admin@dashboard.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('Admin@123!'),
+            ]
+        );
     }
 }

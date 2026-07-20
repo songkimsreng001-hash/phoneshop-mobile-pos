@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   app:
     build:
@@ -7,17 +9,28 @@ services:
     container_name: mobile-shop-app
     restart: unless-stopped
     working_dir: /var/www/html
+
     volumes:
       - ./:/var/www/html
-    depends_on:
-      db:
-        condition: service_healthy
+      - vendor_data:/var/www/html/vendor
+      - storage_data:/var/www/html/storage
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+
     environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+
+      DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: mobile_shop
       DB_USERNAME: mobile_user
       DB_PASSWORD: secret
+
+    depends_on:
+      db:
+        condition: service_healthy
+
     networks:
       - app-network
 
@@ -25,58 +38,81 @@ services:
     image: nginx:stable-alpine
     container_name: mobile-shop-web
     restart: unless-stopped
+
     ports:
       - "8080:80"
+
     volumes:
       - ./:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
     depends_on:
       - app
+
     networks:
       - app-network
 
   db:
     image: mysql:8.0
     container_name: mobile-shop-db
+
     restart: unless-stopped
+
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=256M
+      --max-connections=300
+      --innodb-log-file-size=64M
+
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: mobile_shop
       MYSQL_USER: mobile_user
       MYSQL_PASSWORD: secret
+
     ports:
       - "3306:3306"
+
     volumes:
       - dbdata:/var/lib/mysql
-    networks:
-      - app-network
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
 
+    networks:
+      - app-network
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
+
     container_name: mobile-shop-phpmyadmin
+
     restart: unless-stopped
+
     ports:
       - "8081:80"
+
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
       PMA_USER: root
       PMA_PASSWORD: root
+
     depends_on:
       db:
         condition: service_healthy
+
     networks:
       - app-network
 
 volumes:
   dbdata:
+  vendor_data:
+  storage_data:
 
 networks:
   app-network:
