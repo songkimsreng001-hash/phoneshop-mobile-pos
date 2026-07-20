@@ -26,7 +26,7 @@ class InventoryController extends Controller
         $categories = Category::where('is_active', 1)->orderBy('name')->get();
         $suppliers  = Supplier::where('is_active', 1)->orderBy('name')->get();
 
-        return view('superadmin.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
+        return view('superadmin.layouts.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
     }
 
     public function storeProduct(Request $request)

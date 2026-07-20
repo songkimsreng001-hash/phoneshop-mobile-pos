@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $shops = User::all();
         $data['Shops'] = $shops;
 
-        return view('superadmin.dashboard', $data);
+        return view('superadmin.layouts.dashboard', $data);
     }
 
 }

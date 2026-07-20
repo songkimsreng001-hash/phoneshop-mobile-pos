@@ -1,5 +1,4 @@
 @extends('shop.layouts.main')
-@extends('shop.layouts.top_bar')
 
 @section('page_title', 'Invoices')
 

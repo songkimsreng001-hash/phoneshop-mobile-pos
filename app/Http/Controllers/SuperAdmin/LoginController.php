@@ -17,7 +17,7 @@ class LoginController extends Controller
 
             return redirect('super-admin/dashboard')->with('success', 'Already Logged In');
         }
-        return view('superadmin.login');
+        return view('superadmin.layouts.login');
     }
 
 

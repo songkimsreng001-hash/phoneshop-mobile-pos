@@ -38,6 +38,11 @@ Route::group(['middleware' => 'admin'], function () {
         Route::post('shops/updateProduct', 'updateProduct')->name('admin.shops.products.update');
     });
 
+    Route::controller(\App\Http\Controllers\Admin\PurchaseController::class)->group(function () {
+        Route::get('/shops/{shop_id}/purchases', 'index')->name('admin.purchases.index');
+        Route::post('/shops/purchases/store', 'store')->name('admin.purchases.store');
+    });
+
     Route::get('/shops/{shop_id}/invoices', [InvoiceController::class, 'index'])->name('admin.invoice.show');
     Route::get('/shops/{shop_id}/claims', [ClaimsController::class, 'index'])->name('admin.claims.show');
 });

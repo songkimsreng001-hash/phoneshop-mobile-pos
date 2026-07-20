@@ -16,7 +16,7 @@ class LoginController extends Controller
         if (Auth::guard('web')->check()) {
             return redirect('shop/dashboard')->with('success', 'Already Logged In');
         }
-        return view('shop.login');
+        return view('shop.layouts.login');
     }
 
     public function login_validate(Request $request)

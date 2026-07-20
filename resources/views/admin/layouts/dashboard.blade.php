@@ -1,5 +1,4 @@
 @extends('admin.layouts.main')
-@extends('admin.layouts.top_bar')
 @section('page_title', 'Dashboard Screen')
 
 @section('header_styles')
@@ -14,8 +13,11 @@
 
 @endsection
 @php
-
-    $shopsCount = isset($Shops) ? count($Shops) : 0;
+    $shopsCount = isset($shopsCount) ? $shopsCount : 0;
+    $productsCount = isset($productsCount) ? $productsCount : 0;
+    $invoicesCount = isset($invoicesCount) ? $invoicesCount : 0;
+    $revenue = isset($revenue) ? $revenue : 0;
+    $monthlyRevenue = isset($monthlyRevenue) ? $monthlyRevenue : 0;
 @endphp
 
 
@@ -68,42 +70,92 @@
                             <div class="mt-n20 position-relative">
                                 <!--begin::Row-->
                                 <div class="row g-3 g-lg-6 justify-content-center">
-
-                                    <!--begin::Col-->
                                     <div class="col-md-3">
-                                        <!--begin::Items-->
                                         <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
                                             <div class="d-flex justify-content-between">
-                                                <!--begin::Symbol-->
                                                 <div class="symbol symbol-30px me-5 mb-8">
-                                                <span class="symbol-label">
-                                                    <!--begin::Svg Icon | path: icons/duotune/medicine/med005.svg-->
-                                                    <span class="fs-2qx fas fa-book text-primary">
+                                                    <span class="symbol-label">
+                                                        <span class="fs-2qx fas fa-store text-primary"></span>
                                                     </span>
-                                                    <!--end::Svg Icon-->
-                                                </span>
                                                 </div>
-                                                <!--end::Symbol-->
-                                                <!--begin::Symbol-->
-                                                <div class="symbol   me-5 mb-8">
+                                                <div class="symbol me-5 mb-8">
                                                     <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$shopsCount}}</span>
                                                 </div>
-                                                <!--end::Symbol-->
                                             </div>
-                                            <!--begin::Stats-->
-                                            <div class=" mt-10">
-                                                <!--begin::Number-->
-                                                <span class="text-gray-700 fw-bold fs-2">No. Of Shops</span>
-                                                <!--end::Number-->
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Managed Shops</span>
                                             </div>
-                                            <!--end::Stats-->
                                         </div>
-                                        <!--end::Items-->
                                     </div>
-                                    <!--end::Col-->
 
+                                    <div class="col-md-3">
+                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="symbol symbol-30px me-5 mb-8">
+                                                    <span class="symbol-label">
+                                                        <span class="fs-2qx fas fa-box text-success"></span>
+                                                    </span>
+                                                </div>
+                                                <div class="symbol me-5 mb-8">
+                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$productsCount}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Products</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <div class="col-md-3">
+                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="symbol symbol-30px me-5 mb-8">
+                                                    <span class="symbol-label">
+                                                        <span class="fs-2qx fas fa-receipt text-info"></span>
+                                                    </span>
+                                                </div>
+                                                <div class="symbol me-5 mb-8">
+                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$invoicesCount}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Invoices</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <div class="col-md-3">
+                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="symbol symbol-30px me-5 mb-8">
+                                                    <span class="symbol-label">
+                                                        <span class="fs-2qx fas fa-dollar-sign text-warning"></span>
+                                                    </span>
+                                                </div>
+                                                <div class="symbol me-5 mb-8">
+                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($revenue, 2) }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Revenue</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 g-lg-6 mt-5 justify-content-center">
+                                    <div class="col-md-6">
+                                        <div class="bg-white rounded-2 border p-6">
+                                            <h5 class="fw-bold mb-3">This Month</h5>
+                                            <p class="text-muted mb-0">Monthly revenue: <strong>${{ number_format($monthlyRevenue, 2) }}</strong></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="bg-white rounded-2 border p-6">
+                                            <h5 class="fw-bold mb-3">Quick Summary</h5>
+                                            <p class="text-muted mb-0">You currently oversee {{ $shopsCount }} shop(s) with {{ $productsCount }} product(s) and {{ $invoicesCount }} invoice(s).</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 <!--end::Row-->
                             </div>

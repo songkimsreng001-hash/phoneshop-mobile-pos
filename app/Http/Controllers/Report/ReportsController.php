@@ -28,11 +28,11 @@ class ReportsController extends Controller
                 $query->where('admin_id', $user->id);
             })->get();
 
-            return view('admin.reports', compact('shops', 'rec'));
+            return view('admin.layouts.reports', compact('shops', 'rec'));
         } else {
             $shops = User::all();
 
-            return view('superadmin.reports', compact('shops', 'rec'));
+            return view('superadmin.layouts.reports', compact('shops', 'rec'));
         }
 
     }

@@ -15,13 +15,21 @@ class ShopController extends Controller
     public function index()
     {
         $rec   = Auth::guard('admin')->user();
-        $Shops = auth()->guard('admin')->user()->shops;
+        $shops = $rec->shops;
 
-        return view('admin.shops', ['rec' => $rec, 'shops' => $Shops]);
+        return view('admin.layouts.shops', ['rec' => $rec, 'shops' => $shops]);
     }
 
     public function edit(Request $request)
     {
+        $rec = Auth::guard('admin')->user();
+        $shopId = (int) $request->input('id');
+
+        $isAssigned = $rec->canAccessShop($shopId);
+        if (! $isAssigned) {
+            return redirect()->back()->with('error', 'You can only manage your assigned shop.');
+        }
+
         $rules = [
             'id'     => 'required|exists:users,id',
             'name'   => 'required|string|max:255',
@@ -56,6 +64,14 @@ class ShopController extends Controller
 
     public function updatePassword(Request $request)
     {
+        $rec = Auth::guard('admin')->user();
+        $shopId = (int) $request->input('id');
+
+        $isAssigned = $rec->canAccessShop($shopId);
+        if (! $isAssigned) {
+            return redirect()->back()->with('error', 'You can only manage your assigned shop.');
+        }
+
         $rules = [
             'id'       => 'required|exists:users,id',
             'password' => 'required|string|min:8|confirmed',
@@ -83,6 +99,14 @@ class ShopController extends Controller
 
     public function delete(Request $request)
     {
+        $rec = Auth::guard('admin')->user();
+        $shopId = (int) $request->input('id');
+
+        $isAssigned = $rec->canAccessShop($shopId);
+        if (! $isAssigned) {
+            return redirect()->back()->with('error', 'You can only manage your assigned shop.');
+        }
+
         $rules    = ['id' => 'required|exists:users,id'];
         $messages = [
             'id.required' => 'The ID field is required.',

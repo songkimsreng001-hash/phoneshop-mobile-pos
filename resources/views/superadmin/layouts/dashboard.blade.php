@@ -1,5 +1,4 @@
 @extends('superadmin.layouts.main')
-@extends('superadmin.layouts.top_bar')
 @section('page_title', 'Dashboard Screen')
 
 @section('header_styles')

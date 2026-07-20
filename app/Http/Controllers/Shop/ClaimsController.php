@@ -17,7 +17,7 @@ class ClaimsController extends Controller
         $shop_name = $rec->name;
         $products = Product::where('shop_id', $shop_id)->get();
         
-        return view('shop.claims', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
+        return view('shop.layouts.claims', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
     }
 
     public function getClaimsByShop($shop_id)

@@ -14,9 +14,7 @@ class InvoiceController extends Controller
     public function index($shop_id)
     {
         $rec = Auth::guard('admin')->user();
-        $isAuthorized = ShopAdmin::where('admin_id', $rec->id)
-                             ->where('shop_id', $shop_id)
-                             ->exists();
+        $isAuthorized = $rec->canAccessShop((int) $shop_id);
 
         if (!$isAuthorized) {
             return redirect()->route('admin.shops')
@@ -40,7 +38,7 @@ class InvoiceController extends Controller
 
 
 
-        return view('admin.invoices', ['rec' => $rec, 'shop_id' => $shop_id, 'invoices' => $invoices, 'totalSalesTillNow' => $totalSalesTillNow,'totalSalesThisMonth' => $totalSalesThisMonth], ['shop_name' => $shop->name]);
+        return view('admin.layouts.invoices', ['rec' => $rec, 'shop_id' => $shop_id, 'invoices' => $invoices, 'totalSalesTillNow' => $totalSalesTillNow,'totalSalesThisMonth' => $totalSalesThisMonth], ['shop_name' => $shop->name]);
     }
 
     public function getInvoiceDetails($id)

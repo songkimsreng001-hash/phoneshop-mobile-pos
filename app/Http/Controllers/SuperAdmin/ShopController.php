@@ -19,7 +19,7 @@ class ShopController extends Controller
         $Shops = User::get()->all();
         $Admins = Admin::get()->all();
 
-        return view('superadmin.shops', ['rec' => $rec, 'shops' => $Shops, 'admins' => $Admins]);
+        return view('superadmin.layouts.shops', ['rec' => $rec, 'shops' => $Shops, 'admins' => $Admins]);
 
     }
     public function store(Request $request)

@@ -18,9 +18,7 @@ class InventoryController extends Controller
     {
         $rec = Auth::guard('admin')->user();
 
-        $isAuthorized = ShopAdmin::where('admin_id', $rec->id)
-                                 ->where('shop_id', $shop_id)
-                                 ->exists();
+        $isAuthorized = $rec->canAccessShop((int) $shop_id);
 
         if (!$isAuthorized) {
             return redirect()->route('admin.shops')
@@ -36,7 +34,7 @@ class InventoryController extends Controller
         $categories = Category::where('is_active', 1)->orderBy('name')->get();
         $suppliers  = Supplier::where('is_active', 1)->orderBy('name')->get();
 
-        return view('admin.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
+        return view('admin.layouts.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
     }
 
     public function storeProduct(Request $request)

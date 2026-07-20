@@ -34,4 +34,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class, 'shop_id', 'id');
     }
+
+    public function canAccessShop(int $shopId): bool
+    {
+        return (int) $this->id === $shopId;
+    }
 }

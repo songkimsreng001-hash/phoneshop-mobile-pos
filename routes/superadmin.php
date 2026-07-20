@@ -51,5 +51,13 @@ Route::group(['middleware' => 'superadmin'], function () {
     });
 
     Route::get('/shops/{shop_id}/invoices', [InvoiceController::class, 'index'])->name('superadmin.invoice.show');
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('superadmin.invoices.index');
     Route::get('/shops/{shop_id}/claims', [ClaimsController::class, 'index'])->name('superadmin.claims.show');
+
+    Route::controller(\App\Http\Controllers\SuperAdmin\RoleController::class)->group(function () {
+        Route::get('/roles', 'index')->name('superadmin.roles.index');
+        Route::post('/roles', 'store')->name('superadmin.roles.store');
+        Route::post('/roles/{id}', 'update')->name('superadmin.roles.update');
+        Route::post('/roles/assign', 'assignToAdmin')->name('superadmin.roles.assign');
+    });
 });

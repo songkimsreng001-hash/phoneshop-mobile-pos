@@ -46,4 +46,29 @@ class Admin extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'shop_admins', 'admin_id', 'shop_id');
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'admin_roles');
+    }
+
+    public function hasPermission(string $permissionName): bool
+    {
+        return $this->roles()->with('permissions')->get()->contains(function ($role) use ($permissionName) {
+            return $role->permissions->contains('name', $permissionName);
+        });
+    }
+
+    public function canAccessShop(int $shopId): bool
+    {
+        if ($this->relationLoaded('shops')) {
+            return $this->getRelation('shops')->contains('id', $shopId);
+        }
+
+        if (isset($this->shops) && $this->shops instanceof \Illuminate\Support\Collection) {
+            return $this->shops->contains('id', $shopId);
+        }
+
+        return $this->shops()->where('users.id', $shopId)->exists();
+    }
 }

@@ -1,5 +1,4 @@
 @extends('superadmin.layouts.main')
-@extends('superadmin.layouts.top_bar')
 @section('page_title', 'Claims')
 
 @section('header_styles')

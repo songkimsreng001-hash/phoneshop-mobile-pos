@@ -22,7 +22,7 @@ class AdminController extends Controller
 
 
 
-        return view('superadmin.admins',['rec' => $rec,'admins' => $Admins]);
+        return view('superadmin.layouts.admins',['rec' => $rec,'admins' => $Admins]);
 
     }
     public function store(Request $request)

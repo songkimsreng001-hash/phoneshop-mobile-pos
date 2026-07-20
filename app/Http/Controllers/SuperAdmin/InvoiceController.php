@@ -11,13 +11,23 @@ use App\Models\User;
 
 class InvoiceController extends Controller
 {
-    public function index($shop_id)
+    public function index($shop_id = null)
     {
         $rec = Auth::guard('superadmin')->user();
+
+        if ($shop_id === null) {
+            $shop = User::first();
+            if (!$shop) {
+                return redirect()->route('superadmin.shops');
+            }
+            $shop_id = $shop->id;
+        } else {
+            $shop = User::where('id', $shop_id)->first();
+        }
+
         $invoices = Invoice::where('shop_id', $shop_id)
                            ->orderBy('created_at', 'desc')
                            ->get();
-        $shop = User::where('id', $shop_id)->first();
 
         // Calculate total sales till now
         $totalSalesTillNow = Invoice::where('shop_id', $shop_id)->sum('final_bill');
@@ -28,7 +38,14 @@ class InvoiceController extends Controller
             ->whereMonth('created_at', now()->month)
             ->sum('final_bill');
 
-        return view('admin.invoices', ['rec' => $rec, 'shop_id' => $shop_id, 'invoices' => $invoices,'totalSalesTillNow' => $totalSalesTillNow,'totalSalesThisMonth' => $totalSalesThisMonth], ['shop_name' => $shop->name]);
+        return view('superadmin.layouts.invoices', [
+            'rec' => $rec,
+            'shop_id' => $shop_id,
+            'invoices' => $invoices,
+            'totalSalesTillNow' => $totalSalesTillNow,
+            'totalSalesThisMonth' => $totalSalesThisMonth,
+            'shop_name' => $shop?->name ?? 'Unknown Shop',
+        ]);
     }
 
     public function getInvoiceDetails($id)

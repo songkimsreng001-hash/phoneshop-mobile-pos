@@ -12,14 +12,14 @@ class PosController extends Controller
 {
     public function index()
     {
-        $rec = Auth::guard()->user();
+        $rec = Auth::guard('web')->user();
         $shop_id = $rec->id;
         $shop_name = $rec->name;
         
         // get products that are not deleted
         $products = Product::where('shop_id', $shop_id)->where('isDeleted', 0)->get();
         
-        return view('shop.pos', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
+        return view('shop.layouts.pos', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
     }
 
 }

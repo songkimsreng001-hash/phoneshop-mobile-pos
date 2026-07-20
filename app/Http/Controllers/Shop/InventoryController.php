@@ -15,7 +15,7 @@ class InventoryController extends Controller
 {
     public function index()
     {
-        $rec = Auth::guard()->user();
+        $rec = Auth::guard('web')->user();
         $shop_id = $rec->id;
 
         // Get products that are not deleted, with related models
@@ -29,7 +29,7 @@ class InventoryController extends Controller
         $categories = Category::where('is_active', 1)->orderBy('name')->get();
         $suppliers  = Supplier::where('is_active', 1)->orderBy('name')->get();
 
-        return view('shop.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
+        return view('shop.layouts.inventory', compact('rec', 'products', 'shop_id', 'brands', 'categories', 'suppliers'));
     }
 
     public function storeProduct(Request $request)

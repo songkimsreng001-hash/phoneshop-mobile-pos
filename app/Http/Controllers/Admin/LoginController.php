@@ -13,7 +13,7 @@ class LoginController extends Controller
         if (Auth::guard('admin')->check()) {
             return redirect('admin-panel/dashboard')->with('success', 'Already Logged In');
         }
-        return view('admin.login');
+        return view('admin.layouts.login');
     }
 
     public function login_validate(Request $request)

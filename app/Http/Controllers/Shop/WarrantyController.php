@@ -17,7 +17,7 @@ class WarrantyController extends Controller
         $shop_name = $rec->name;
         $products = Product::where('shop_id', $shop_id)->get();
         
-        return view('shop.warranty', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
+        return view('shop.layouts.warranty', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
     }
 
 }

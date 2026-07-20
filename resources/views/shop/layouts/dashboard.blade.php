@@ -1,5 +1,4 @@
 @extends('shop.layouts.main')
-@extends('shop.layouts.top_bar')
 @section('page_title', 'Dashboard Screen')
 
 @section('header_styles')
@@ -14,8 +13,11 @@
 
 @endsection
 @php
-
     $productsCount = isset($products) ? count($products) : 0;
+    $salesCount = isset($salesCount) ? $salesCount : 0;
+    $purchasesCount = isset($purchasesCount) ? $purchasesCount : 0;
+    $stockValue = isset($stockValue) ? $stockValue : 0;
+    $monthlySales = isset($monthlySales) ? $monthlySales : 0;
 @endphp
 
 
@@ -68,42 +70,84 @@
                             <div class="mt-n20 position-relative">
                                 <!--begin::Row-->
                                 <div class="row g-3 g-lg-6 justify-content-center">
-
-                                    <!--begin::Col-->
                                     <div class="col-md-3">
-                                        <!--begin::Items-->
                                         <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
                                             <div class="d-flex justify-content-between">
-                                                <!--begin::Symbol-->
                                                 <div class="symbol symbol-30px me-5 mb-8">
-                                                <span class="symbol-label">
-                                                    <!--begin::Svg Icon | path: icons/duotune/medicine/med005.svg-->
-                                                    <span class="fs-2qx fas fa-book text-primary">
-                                                    </span>
-                                                    <!--end::Svg Icon-->
-                                                </span>
+                                                    <span class="symbol-label"><span class="fs-2qx fas fa-box text-primary"></span></span>
                                                 </div>
-                                                <!--end::Symbol-->
-                                                <!--begin::Symbol-->
-                                                <div class="symbol   me-5 mb-8">
+                                                <div class="symbol me-5 mb-8">
                                                     <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$productsCount}}</span>
                                                 </div>
-                                                <!--end::Symbol-->
                                             </div>
-                                            <!--begin::Stats-->
-                                            <div class=" mt-10">
-                                                <!--begin::Number-->
-                                                <span class="text-gray-700 fw-bold fs-2">No. Of Products</span>
-                                                <!--end::Number-->
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Products</span>
                                             </div>
-                                            <!--end::Stats-->
                                         </div>
-                                        <!--end::Items-->
                                     </div>
-                                    <!--end::Col-->
 
+                                    <div class="col-md-3">
+                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="symbol symbol-30px me-5 mb-8">
+                                                    <span class="symbol-label"><span class="fs-2qx fas fa-receipt text-success"></span></span>
+                                                </div>
+                                                <div class="symbol me-5 mb-8">
+                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$salesCount}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Sales</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <div class="col-md-3">
+                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="symbol symbol-30px me-5 mb-8">
+                                                    <span class="symbol-label"><span class="fs-2qx fas fa-truck text-info"></span></span>
+                                                </div>
+                                                <div class="symbol me-5 mb-8">
+                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$purchasesCount}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Purchases</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <div class="col-md-3">
+                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="symbol symbol-30px me-5 mb-8">
+                                                    <span class="symbol-label"><span class="fs-2qx fas fa-warehouse text-warning"></span></span>
+                                                </div>
+                                                <div class="symbol me-5 mb-8">
+                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$stockValue}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-10">
+                                                <span class="text-gray-700 fw-bold fs-2">Stock Qty</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 g-lg-6 mt-5 justify-content-center">
+                                    <div class="col-md-6">
+                                        <div class="bg-white rounded-2 border p-6">
+                                            <h5 class="fw-bold mb-3">This Month</h5>
+                                            <p class="text-muted mb-0">Monthly sales: <strong>${{ number_format($monthlySales, 2) }}</strong></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="bg-white rounded-2 border p-6">
+                                            <h5 class="fw-bold mb-3">Shop Scope</h5>
+                                            <p class="text-muted mb-0">You can manage only your own shop data.</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 <!--end::Row-->
                             </div>

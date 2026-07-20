@@ -15,7 +15,7 @@ class InvoiceController extends Controller
 
     public function index()
     {
-        $rec = Auth::guard()->user();
+        $rec = Auth::guard('web')->user();
         $shop_id = $rec->id;
         $shop_name = $rec->name;
         $invoices = Invoice::where('shop_id', $shop_id)
@@ -31,7 +31,7 @@ class InvoiceController extends Controller
         ->whereMonth('created_at', now()->month)
         ->sum('final_bill');
 
-        return view('shop.invoices', [
+        return view('shop.layouts.invoices', [
             'rec' => $rec,
             'shop_id' => $shop_id,
             'shop_name' => $shop_name,

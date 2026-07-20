@@ -13,9 +13,7 @@ class ClaimsController extends Controller
     public function index($shop_id)
     {
         $rec = Auth::guard('admin')->user();
-        $isAuthorized = ShopAdmin::where('admin_id', $rec->id)
-                             ->where('shop_id', $shop_id)
-                             ->exists();
+        $isAuthorized = $rec->canAccessShop((int) $shop_id);
 
         if (!$isAuthorized) {
             return redirect()->route('admin.shops')
@@ -23,6 +21,6 @@ class ClaimsController extends Controller
         }
         $shop = User::where('id', $shop_id)->first();
 
-        return view('admin.claims', ['rec' => $rec, 'shop_id' => $shop_id, 'shop_name' => $shop->name]);
+        return view('admin.layouts.claims', ['rec' => $rec, 'shop_id' => $shop_id, 'shop_name' => $shop->name]);
     }
 }

@@ -15,6 +15,6 @@ class ClaimsController extends Controller
         $rec = Auth::guard('superadmin')->user();
         $shop = User::where('id', $shop_id)->first();
 
-        return view('admin.claims', ['rec' => $rec, 'shop_id' => $shop_id, 'shop_name' => $shop->name]);
+        return view('superadmin.layouts.claims', ['rec' => $rec, 'shop_id' => $shop_id, 'shop_name' => $shop->name]);
     }
 }
