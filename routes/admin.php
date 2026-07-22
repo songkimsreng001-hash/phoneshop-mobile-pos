@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Report\ReportsController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\ClaimController;
+use App\Http\Controllers\Admin\CategoryController;
 
 Route::controller(LoginController::class)->group(function () {
     Route::get('/', 'index')->name('admin.home');
@@ -52,31 +53,38 @@ Route::group(['middleware' => 'admin'], function () {
     Route::get('/shops/{shop_id}/invoices', [InvoiceController::class, 'index'])->name('admin.invoice.show');
     Route::get('/invoices/{id}/details', [InvoiceController::class, 'getInvoiceDetails'])->name('admin.invoices.details');
     Route::get('/shops/{shop_id}/claims', [ClaimController::class, 'index'])->name('admin.claims.show');
-});
 
-Route::controller(ProductController::class)->group(function () {
-    Route::get('/shops/{shop_id}/products', 'index')->name('admin.products.index');
-    Route::post('/shops/products/store', 'store')->name('admin.products.store');
-    Route::post('/shops/products/update', 'update')->name('admin.products.update');
-    Route::delete('/shops/products/{id}', 'destroy')->name('admin.products.destroy');
-});
+    Route::controller(CategoryController::class)->group(function () {
+        Route::get('/categories', 'index')->name('admin.categories.index');
+        Route::post('/categories', 'store')->name('admin.categories.store');
+        Route::post('/categories/{id}', 'update')->name('admin.categories.update');
+        Route::delete('/categories/{id}', 'destroy')->name('admin.categories.destroy');
+    });
 
-Route::controller(StockController::class)->group(function () {
-    Route::get('/shops/{shop_id}/stock', 'index')->name('admin.stock.index');
-    Route::post('/shops/stock/adjust', 'store')->name('admin.stock.adjust');
-});
+    Route::controller(ProductController::class)->group(function () {
+        Route::get('/shops/{shop_id}/products', 'index')->name('admin.products.index');
+        Route::post('/shops/products/store', 'store')->name('admin.products.store');
+        Route::post('/shops/products/update', 'update')->name('admin.products.update');
+        Route::delete('/shops/products/{id}', 'destroy')->name('admin.products.destroy');
+    });
 
-Route::controller(SupplierController::class)->group(function () {
-    Route::get('/suppliers', 'index')->name('admin.suppliers.index');
-    Route::post('/suppliers', 'store')->name('admin.suppliers.store');
-    Route::post('/suppliers/{id}', 'update')->name('admin.suppliers.update');
-    Route::delete('/suppliers/{id}', 'destroy')->name('admin.suppliers.destroy');
-});
+    Route::controller(StockController::class)->group(function () {
+        Route::get('/shops/{shop_id}/stock', 'index')->name('admin.stock.index');
+        Route::post('/shops/stock/adjust', 'store')->name('admin.stock.adjust');
+    });
 
-Route::controller(CustomerController::class)->group(function () {
-    Route::get('/customers', 'index')->name('admin.customers.index');
-    Route::post('/customers', 'store')->name('admin.customers.store');
-    Route::post('/customers/{id}', 'update')->name('admin.customers.update');
-    Route::delete('/customers/{id}', 'destroy')->name('admin.customers.destroy');
-    Route::get('/customers/{id}', 'show')->name('admin.customers.show');
+    Route::controller(SupplierController::class)->group(function () {
+        Route::get('/suppliers', 'index')->name('admin.suppliers.index');
+        Route::post('/suppliers', 'store')->name('admin.suppliers.store');
+        Route::post('/suppliers/{id}', 'update')->name('admin.suppliers.update');
+        Route::delete('/suppliers/{id}', 'destroy')->name('admin.suppliers.destroy');
+    });
+
+    Route::controller(CustomerController::class)->group(function () {
+        Route::get('/customers', 'index')->name('admin.customers.index');
+        Route::post('/customers', 'store')->name('admin.customers.store');
+        Route::post('/customers/{id}', 'update')->name('admin.customers.update');
+        Route::delete('/customers/{id}', 'destroy')->name('admin.customers.destroy');
+        Route::get('/customers/{id}', 'show')->name('admin.customers.show');
+    });
 });

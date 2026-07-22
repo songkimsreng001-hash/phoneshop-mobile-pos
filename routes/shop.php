@@ -10,6 +10,7 @@ use App\Http\Controllers\Shop\PosController;
 use App\Http\Controllers\Shop\InvoiceController;
 use App\Http\Controllers\Shop\WarrantyController;
 use App\Http\Controllers\Shop\ClaimController;
+use App\Http\Controllers\Shop\CategoryController;
 
 Route::controller(LoginController::class)->group(function () {
     Route::get('/', 'index')->name('shop.home');
@@ -36,6 +37,13 @@ Route::group(['middleware' => 'user'], function () {
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('shop.invoices.index');
     Route::get('/invoices/{id}/details', [InvoiceController::class, 'getInvoiceDetails'])->name('shop.invoices.details');
     Route::get('/invoices/{id}/details-with-warranty', [InvoiceController::class, 'getInvoiceDetailsWithWarranty'])->name('shop.invoices.detailsWithWarranty');
+
+    Route::controller(CategoryController::class)->group(function () {
+        Route::get('/categories', 'index')->name('shop.categories.index');
+        Route::post('/categories', 'store')->name('shop.categories.store');
+        Route::post('/categories/{id}', 'update')->name('shop.categories.update');
+        Route::delete('/categories/{id}', 'destroy')->name('shop.categories.destroy');
+    });
 });
 
 Route::controller(SaleController::class)->group(function () {

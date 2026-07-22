@@ -64,25 +64,25 @@ Route::group(['middleware' => 'superadmin'], function () {
         Route::post('/roles/assign', 'assignToAdmin')->name('superadmin.roles.assign');
         Route::delete('/roles/{id}', 'destroy')->name('superadmin.roles.destroy');
     });
-});
 
-Route::controller(PermissionController::class)->group(function () {
-    Route::get('/permissions', 'index')->name('superadmin.permissions.index');
-    Route::post('/permissions', 'store')->name('superadmin.permissions.store');
-    Route::post('/permissions/{id}', 'update')->name('superadmin.permissions.update');
-    Route::delete('/permissions/{id}', 'destroy')->name('superadmin.permissions.destroy');
-});
+    Route::controller(PermissionController::class)->group(function () {
+        Route::get('/permissions', 'index')->name('superadmin.permissions.index');
+        Route::post('/permissions', 'store')->name('superadmin.permissions.store');
+        Route::post('/permissions/{id}', 'update')->name('superadmin.permissions.update');
+        Route::delete('/permissions/{id}', 'destroy')->name('superadmin.permissions.destroy');
+    });
 
-Route::controller(BrandController::class)->group(function () {
-    Route::get('/brands', 'index')->name('superadmin.brands.index');
-    Route::post('/brands', 'store')->name('superadmin.brands.store');
-    Route::post('/brands/{id}', 'update')->name('superadmin.brands.update');
-    Route::delete('/brands/{id}', 'destroy')->name('superadmin.brands.destroy');
-});
+    Route::controller(BrandController::class)->group(function () {
+        Route::get('/brands', 'index')->name('superadmin.brands.index');
+        Route::post('/brands', 'store')->name('superadmin.brands.store');
+        Route::post('/brands/{id}', 'update')->name('superadmin.brands.update');
+        Route::delete('/brands/{id}', 'destroy')->name('superadmin.brands.destroy');
+    });
 
-Route::controller(CategoryController::class)->group(function () {
-    Route::get('/categories', 'index')->name('superadmin.categories.index');
-    Route::post('/categories', 'store')->name('superadmin.categories.store');
-    Route::post('/categories/{id}', 'update')->name('superadmin.categories.update');
-    Route::delete('/categories/{id}', 'destroy')->name('superadmin.categories.destroy');
+    Route::controller(CategoryController::class)->group(function () {
+        Route::get('/categories', 'index')->name('superadmin.categories.index');
+        Route::post('/categories', 'store')->name('superadmin.categories.store');
+        Route::post('/categories/{id}', 'update')->name('superadmin.categories.update');
+        Route::delete('/categories/{id}', 'destroy')->name('superadmin.categories.destroy');
+    });
 });
