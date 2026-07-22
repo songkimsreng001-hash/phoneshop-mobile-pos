@@ -85,4 +85,19 @@ class RoleController extends Controller
 
         return redirect()->back()->with('success', 'Role assigned successfully.');
     }
+
+    public function destroy($id)
+    {
+        $role = Role::findOrFail($id);
+
+        if ($role->is_system) {
+            return redirect()->back()->with('error', 'System roles cannot be deleted.');
+        }
+
+        $role->permissions()->detach();
+        $role->admins()->detach();
+        $role->delete();
+
+        return redirect()->back()->with('success', 'Role deleted.');
+    }
 }

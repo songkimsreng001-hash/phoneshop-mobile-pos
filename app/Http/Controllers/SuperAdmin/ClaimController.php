@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ShopAdmin;
 use App\Models\User;
 
-class ClaimsController extends Controller
+class ClaimController extends Controller
 {
     public function index($shop_id)
     {

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Shop\CustomerController;
+use App\Http\Controllers\Shop\SaleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Shop\LoginController;
 use App\Http\Controllers\Shop\DashboardController;
@@ -7,7 +9,7 @@ use App\Http\Controllers\Shop\InventoryController;
 use App\Http\Controllers\Shop\PosController;
 use App\Http\Controllers\Shop\InvoiceController;
 use App\Http\Controllers\Shop\WarrantyController;
-use App\Http\Controllers\Shop\ClaimsController;
+use App\Http\Controllers\Shop\ClaimController;
 
 Route::controller(LoginController::class)->group(function () {
     Route::get('/', 'index')->name('shop.home');
@@ -30,6 +32,27 @@ Route::group(['middleware' => 'user'], function () {
 
     Route::get('pos', [PosController::class, 'index'])->name('shop.pos.show');
     Route::get('warranty', [WarrantyController::class, 'index'])->name('shop.warranty.show');
-    Route::get('claims', [ClaimsController::class, 'index'])->name('shop.claims.show');
+    Route::get('claims', [ClaimController::class, 'index'])->name('shop.claims.show');
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('shop.invoices.index');
+    Route::get('/invoices/{id}/details', [InvoiceController::class, 'getInvoiceDetails'])->name('shop.invoices.details');
+    Route::get('/invoices/{id}/details-with-warranty', [InvoiceController::class, 'getInvoiceDetailsWithWarranty'])->name('shop.invoices.detailsWithWarranty');
 });
+
+Route::controller(SaleController::class)->group(function () {
+    Route::get('/sales', 'index')->name('shop.sales.index');
+    Route::get('/sales/{id}', 'show')->name('shop.sales.show');
+});
+
+Route::controller(CustomerController::class)->group(function () {
+    Route::get('/customers', 'index')->name('shop.customers.index');
+    Route::post('/customers', 'store')->name('shop.customers.store');
+    Route::get('/customers/search', 'search')->name('shop.customers.search');
+});
+
+Route::post('/invoices', [InvoiceController::class, 'store'])->name('shop.invoices.store');
+Route::post('/invoices/claim', [InvoiceController::class, 'storeClaim'])->name('shop.invoices.storeClaim');
+
+Route::post('pos/store', [PosController::class, 'store'])->name('shop.pos.store');
+Route::post('claims/store', [ClaimController::class, 'store'])->name('shop.claims.store');
+Route::post('warranty/store', [WarrantyController::class, 'store'])->name('shop.warranty.store');
+Route::get('warranty/check', [WarrantyController::class, 'check'])->name('shop.warranty.check');

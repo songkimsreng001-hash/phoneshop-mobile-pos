@@ -68,4 +68,77 @@ class PurchaseController extends Controller
 
         return redirect()->back()->with('success', 'Purchase created successfully.');
     }
+
+    /**
+     * Allow changing status/payment_status/notes on a purchase.
+     * If the status is moved to 'received' for the first time, stock is
+     * incremented for each purchased line; if moved away from 'received',
+     * the previously-added stock is reversed.
+     */
+    public function update(Request $request, $id)
+    {
+        $rec = Auth::guard('admin')->user();
+        $purchase = Purchase::with('details')->findOrFail($id);
+
+        if (!$rec->canAccessShop((int) $purchase->shop_id)) {
+            return redirect()->route('admin.shops')->with('error', 'Unauthorized access or shop does not exist.');
+        }
+
+        $wasReceived = $purchase->status === 'received';
+
+        $purchase->status = $request->input('status', $purchase->status);
+        $purchase->payment_status = $request->input('payment_status', $purchase->payment_status);
+        $purchase->notes = $request->input('notes', $purchase->notes);
+        $purchase->save();
+
+        $isReceivedNow = $purchase->status === 'received';
+
+        if (!$wasReceived && $isReceivedNow) {
+            foreach ($purchase->details as $line) {
+                $product = Product::find($line->product_id);
+                if ($product) {
+                    $product->qty = ($product->qty ?? 0) + $line->quantity;
+                    $product->save();
+                }
+            }
+        } elseif ($wasReceived && !$isReceivedNow) {
+            foreach ($purchase->details as $line) {
+                $product = Product::find($line->product_id);
+                if ($product) {
+                    $product->qty = max(($product->qty ?? 0) - $line->quantity, 0);
+                    $product->save();
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Purchase updated successfully.');
+    }
+
+    /**
+     * Soft-delete a purchase. If it had already been received, reverse the
+     * stock that was added for it.
+     */
+    public function destroy($id)
+    {
+        $rec = Auth::guard('admin')->user();
+        $purchase = Purchase::with('details')->findOrFail($id);
+
+        if (!$rec->canAccessShop((int) $purchase->shop_id)) {
+            return redirect()->route('admin.shops')->with('error', 'Unauthorized access or shop does not exist.');
+        }
+
+        if ($purchase->status === 'received') {
+            foreach ($purchase->details as $line) {
+                $product = Product::find($line->product_id);
+                if ($product) {
+                    $product->qty = max(($product->qty ?? 0) - $line->quantity, 0);
+                    $product->save();
+                }
+            }
+        }
+
+        $purchase->delete();
+
+        return redirect()->back()->with('success', 'Purchase cancelled.');
+    }
 }
