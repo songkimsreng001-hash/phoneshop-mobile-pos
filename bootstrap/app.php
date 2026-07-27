@@ -1,9 +1,9 @@
 <?php
-
+ 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-
+ 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         // web.php is loaded by RouteServiceProvider to avoid double-loading
@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user'       => \App\Http\Middleware\UserMiddleware::class,
             'admin'      => \App\Http\Middleware\AdminMiddleware::class,
             'superadmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
+            'panel.auth' => \App\Http\Middleware\PanelAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

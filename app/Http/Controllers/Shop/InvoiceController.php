@@ -41,14 +41,23 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function getInvoiceDetails($id)
+    public function getInvoiceDetails(Request $request, $id)
     {
         // Fetch the invoice by its ID, including related sales and products
         $invoice = Invoice::with('sales.product')->findorFail($id);
 
-        // Check if invoice exists
-        if (!$invoice) {
-            return response()->json(['message' => 'Invoice not found'], 404);
+        // Shop users may only view invoices that belong to their own shop.
+        // Admin/superadmin (resolved by PanelAuthMiddleware on the api.php
+        // routes) are not restricted here. When this method is hit via the
+        // shop.php web route (no panel_role attribute set), fall back to
+        // checking the logged-in shop session directly.
+        $panelRole = $request->attributes->get('panel_role');
+        $shopUser = Auth::guard('web')->user();
+
+        if (($panelRole === 'shop' || ($panelRole === null && $shopUser)) && $shopUser) {
+            if ((int) $invoice->shop_id !== (int) $shopUser->id) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
         }
 
         // Return the invoice data with sales and products
@@ -60,9 +69,13 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        // shop_id always comes from the authenticated session, never from
+        // client input — a shop user must not be able to write invoices
+        // against another shop's id.
+        $shopId = Auth::guard('web')->id();
+
         // Validate incoming request data
         $validated = $request->validate([
-            'shop_id' => 'required|integer',
             'products' => 'required|array', // Expect an array of products
             'products.*.id' => 'required|integer|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -78,7 +91,7 @@ class InvoiceController extends Controller
 
         // Create the invoice
         $invoice = Invoice::create([
-            'shop_id' => $validated['shop_id'],
+            'shop_id' => $shopId,
             'total_bill' => $validated['total_bill'],
             'discount' => $validated['discount'] ?? 0,
             'final_bill' => $validated['final_bill'],
@@ -92,7 +105,7 @@ class InvoiceController extends Controller
             // Create sale record
             Sale::create([
                 'product_id' => $productData['id'],
-                'shop_id' => $validated['shop_id'],
+                'shop_id' => $shopId,
                 'sale_date' => now(),
                 'sale_price' => $productData['price'],
                 'invoice_id' => $invoice->id,
@@ -112,7 +125,7 @@ class InvoiceController extends Controller
 
 
 
-    public function getInvoiceDetailsWithWarranty($id)
+    public function getInvoiceDetailsWithWarranty(Request $request, $id)
     {
         // Fetch the invoice by its ID, including related sales and products
         $invoice = Invoice::with('sales.product')->findOrFail($id);
@@ -120,7 +133,17 @@ class InvoiceController extends Controller
         if (!$invoice) {
             return response()->json(['message' => 'Invoice not found'], 404);
         }
-    
+
+        // Shop users may only view warranty details for their own invoices.
+        $panelRole = $request->attributes->get('panel_role');
+        $shopUser = Auth::guard('web')->user();
+
+        if (($panelRole === 'shop' || ($panelRole === null && $shopUser)) && $shopUser) {
+            if ((int) $invoice->shop_id !== (int) $shopUser->id) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        }
+
         // Current date for warranty validation
         $currentDate = Carbon::now();
 
@@ -165,15 +188,31 @@ class InvoiceController extends Controller
 
     public function storeClaim(Request $request)
     {
+        // shop_id always comes from the authenticated session, never from
+        // client input.
+        $shopId = Auth::guard('web')->id();
+
         $validated = $request->validate([
             'claims' => 'required|array',
             'claims.*.product_id' => 'required|integer|exists:products,id',
             'claims.*.invoice_id' => 'required|integer|exists:invoices,id',
             'claims.*.quantity' => 'required|integer|min:1', // Validate quantity
-            'shop_id' => 'required|integer|exists:users,id',
         ]);
 
         foreach ($validated['claims'] as $claim) {
+            // Confirm the invoice actually belongs to this shop before
+            // allowing a claim to be filed against it.
+            $invoiceBelongsToShop = \DB::table('invoices')
+                ->where('id', $claim['invoice_id'])
+                ->where('shop_id', $shopId)
+                ->exists();
+
+            if (!$invoiceBelongsToShop) {
+                return response()->json([
+                    'message' => "Invoice ID {$claim['invoice_id']} does not belong to your shop.",
+                ], 403);
+            }
+
             // Fetch the total purchased quantity for the product in the invoice
             $purchasedQuantity = \DB::table('sales')
                 ->where('invoice_id', $claim['invoice_id'])
@@ -200,7 +239,7 @@ class InvoiceController extends Controller
             \DB::table('claims')->insert([
                 'product_id' => $claim['product_id'],
                 'invoice_id' => $claim['invoice_id'],
-                'shop_id' => $validated['shop_id'],
+                'shop_id' => $shopId,
                 'quantity' => $claim['quantity'], // Save claimed quantity
                 'created_at' => now(),
                 'updated_at' => now(),

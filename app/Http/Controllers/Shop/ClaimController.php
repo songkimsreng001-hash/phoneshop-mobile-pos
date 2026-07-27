@@ -23,8 +23,21 @@ class ClaimController extends Controller
         return view('shop.layouts.claims', ['rec' => $rec, 'products' => $products, 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
     }
 
-    public function getClaimsByShop($shop_id)
+    public function getClaimsByShop(Request $request, $shop_id)
     {
+        // Shop users may only pull claims for their own shop. Admin and
+        // superadmin (set by PanelAuthMiddleware on the api.php route) are
+        // allowed to look up any shop, matching the panel-level access
+        // they already have via routes/admin.php and routes/superadmin.php.
+        $panelRole = $request->attributes->get('panel_role');
+        $shopUser = Auth::guard('web')->user();
+
+        if (($panelRole === 'shop' || ($panelRole === null && $shopUser)) && $shopUser) {
+            if ((int) $shop_id !== (int) $shopUser->id) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        }
+
         $claims = DB::table('claims')
             ->join('products', 'claims.product_id', '=', 'products.id')
             ->where('claims.shop_id', $shop_id)
