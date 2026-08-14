@@ -192,6 +192,7 @@
                                                                 </div>
                                                                 <!--end::Heading-->
                                                                 <!--begin::Menu item-->
+                                                                @adminCan('manage_staff')
                                                                 <div class="menu-item px-3">
                                                                     <a href="javascript:edit_modal('{{ $admin->id }}','{{ $admin->name }}','{{ $admin->email }}','{{ $admin->status }}');"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
@@ -216,6 +217,7 @@
                                                                     </a>
 
                                                                 </div>
+                                                                @endadminCan
                                                                 <div class="menu-item px-3">
                                                                     <a href="{{ route('admin.inventory.show', $admin->id) }}"
                                                                         class="btn btn-light-success fw-bolder mb-3 w-100"
@@ -254,6 +256,7 @@
                                                                 </div>
                                                                 <!--begi
                                                                     n::Menu item-->
+                                                                @adminCan('manage_staff')
                                                                 <div class="menu-item px-3">
                                                                     <a href="javascript:delete_modal('{{ $admin->id }}');"
                                                                         class="btn btn-light-danger fw-bolder mb-3 w-100"
@@ -266,6 +269,7 @@
                                                                     </a>
 
                                                                 </div>
+                                                                @endadminCan
                                                                 <!--end::Menu item-->
                                                             </div>
                                                             <!--end::Menu 3-->

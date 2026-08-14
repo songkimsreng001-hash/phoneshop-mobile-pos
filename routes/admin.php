@@ -27,13 +27,13 @@ Route::group(['middleware' => 'admin'], function () {
         Route::get('/dashboard', 'index')->name('admin.dashboard');
     });
 
-    Route::get('/reports', [ReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('/reports', [ReportsController::class, 'index'])->name('admin.reports.index')->middleware('permission:view_reports');
 
     Route::controller(ShopController::class)->group(function () {
         Route::get('/shops', 'index')->name('admin.shops');
-        Route::post('shop/edit', 'edit')->name('admin.edit.shop');
-        Route::post('shop/update-password', 'updatePassword')->name('admin.updatepass.shop');
-        Route::post('shop/delete', 'delete')->name('admin.delete.shop');
+        Route::post('shop/edit', 'edit')->name('admin.edit.shop')->middleware('permission:manage_staff');
+        Route::post('shop/update-password', 'updatePassword')->name('admin.updatepass.shop')->middleware('permission:manage_staff');
+        Route::post('shop/delete', 'delete')->name('admin.delete.shop')->middleware('permission:manage_staff');
     });
 
     Route::controller(InventoryController::class)->group(function () {
@@ -56,15 +56,15 @@ Route::group(['middleware' => 'admin'], function () {
 
     Route::controller(CategoryController::class)->group(function () {
         Route::get('/categories', 'index')->name('admin.categories.index');
-        Route::post('/categories', 'store')->name('admin.categories.store');
-        Route::post('/categories/{id}', 'update')->name('admin.categories.update');
-        Route::delete('/categories/{id}', 'destroy')->name('admin.categories.destroy');
+        Route::post('/categories', 'store')->name('admin.categories.store')->middleware('permission:manage_categories');
+        Route::post('/categories/{id}', 'update')->name('admin.categories.update')->middleware('permission:manage_categories');
+        Route::delete('/categories/{id}', 'destroy')->name('admin.categories.destroy')->middleware('permission:manage_categories');
     });
 
     Route::controller(ProductController::class)->group(function () {
         Route::get('/shops/{shop_id}/products', 'index')->name('admin.products.index');
-        Route::post('/shops/products/store', 'store')->name('admin.products.store');
-        Route::post('/shops/products/update', 'update')->name('admin.products.update');
+        Route::post('/shops/products/store', 'store')->name('admin.products.store')->middleware('permission:create_products');
+        Route::post('/shops/products/update', 'update')->name('admin.products.update')->middleware('permission:edit_products');
         Route::delete('/shops/products/{id}', 'destroy')->name('admin.products.destroy')->middleware('permission:delete_products');
     });
 
@@ -75,16 +75,16 @@ Route::group(['middleware' => 'admin'], function () {
 
     Route::controller(SupplierController::class)->group(function () {
         Route::get('/suppliers', 'index')->name('admin.suppliers.index');
-        Route::post('/suppliers', 'store')->name('admin.suppliers.store');
-        Route::post('/suppliers/{id}', 'update')->name('admin.suppliers.update');
-        Route::delete('/suppliers/{id}', 'destroy')->name('admin.suppliers.destroy');
+        Route::post('/suppliers', 'store')->name('admin.suppliers.store')->middleware('permission:manage_brands');
+        Route::post('/suppliers/{id}', 'update')->name('admin.suppliers.update')->middleware('permission:manage_brands');
+        Route::delete('/suppliers/{id}', 'destroy')->name('admin.suppliers.destroy')->middleware('permission:manage_brands');
     });
 
     Route::controller(CustomerController::class)->group(function () {
         Route::get('/customers', 'index')->name('admin.customers.index');
-        Route::post('/customers', 'store')->name('admin.customers.store');
-        Route::post('/customers/{id}', 'update')->name('admin.customers.update');
-        Route::delete('/customers/{id}', 'destroy')->name('admin.customers.destroy');
+        Route::post('/customers', 'store')->name('admin.customers.store')->middleware('permission:manage_customers');
+        Route::post('/customers/{id}', 'update')->name('admin.customers.update')->middleware('permission:manage_customers');
+        Route::delete('/customers/{id}', 'destroy')->name('admin.customers.destroy')->middleware('permission:manage_customers');
         Route::get('/customers/{id}', 'show')->name('admin.customers.show');
     });
 });
