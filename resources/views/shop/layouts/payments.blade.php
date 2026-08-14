@@ -21,8 +21,8 @@
     </div>
 
     <div class="row g-5 mb-5">
-        <div class="col-md-6 col-xl-4"><div class="payment-hero p-6 h-100"><div class="text-white-50 mb-2">Outstanding</div><div class="fs-2x fw-bold">{{ number_format($outstanding, 2) }} AED</div><div class="mt-3">Unpaid and partial invoices</div></div></div>
-        <div class="col-md-6 col-xl-4"><div class="card payment-card p-6 h-100"><div class="text-muted mb-2">Paid this month</div><div class="fs-2x fw-bold text-dark">{{ number_format($paidThisMonth, 2) }} AED</div><div class="text-muted mt-3">Payments recorded this month</div></div></div>
+        <div class="col-md-6 col-xl-4"><div class="payment-hero p-6 h-100"><div class="text-white-50 mb-2">Outstanding</div><div class="fs-2x fw-bold">{{ number_format($outstanding, 2) }} USD</div><div class="mt-3">Unpaid and partial invoices</div></div></div>
+        <div class="col-md-6 col-xl-4"><div class="card payment-card p-6 h-100"><div class="text-muted mb-2">Paid this month</div><div class="fs-2x fw-bold text-dark">{{ number_format($paidThisMonth, 2) }} USD</div><div class="text-muted mt-3">Payments recorded this month</div></div></div>
         <div class="col-xl-4"><div class="card payment-card p-6 h-100"><div class="text-muted mb-2">Invoices awaiting payment</div><div class="fs-2x fw-bold text-dark">{{ $invoices->count() }}</div><div class="text-muted mt-3">Select an invoice below to collect payment</div></div></div>
     </div>
 
@@ -38,9 +38,9 @@
                         <tr>
                             <td class="fw-bold">#{{ $invoice->id }}</td>
                             <td>{{ $invoice->customer_name ?: 'Walk-in customer' }}</td>
-                            <td>{{ number_format($invoice->final_bill, 2) }} AED</td>
-                            <td>{{ number_format($invoice->amount_paid, 2) }} AED</td>
-                            <td class="fw-bold text-danger">{{ number_format($balance, 2) }} AED</td>
+                            <td>{{ number_format($invoice->final_bill, 2) }} USD</td>
+                            <td>{{ number_format($invoice->amount_paid, 2) }} USD</td>
+                            <td class="fw-bold text-danger">{{ number_format($balance, 2) }} USD</td>
                             <td><span class="badge bg-light-warning text-warning payment-status">{{ ucfirst($invoice->payment_status) }}</span></td>
                             <td class="text-end"><button class="btn btn-sm btn-success collect-payment" data-id="{{ $invoice->id }}" data-balance="{{ number_format($balance, 2, '.', '') }}">Collect payment</button></td>
                         </tr>
@@ -61,7 +61,7 @@
             <div class="modal-header"><h5 class="modal-title">Collect Payment <span id="paymentInvoiceLabel"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <input type="hidden" id="payment_invoice_id" name="invoice_id">
-                <div class="alert alert-light d-flex justify-content-between"><span>Outstanding balance</span><strong id="paymentBalance">0.00 AED</strong></div>
+                <div class="alert alert-light d-flex justify-content-between"><span>Outstanding balance</span><strong id="paymentBalance">0.00 USD</strong></div>
                 <div class="mb-4"><label class="form-label">Amount</label><input type="number" min="0.01" step="0.01" class="form-control" id="paymentAmount" name="amount" required></div>
                 <div class="mb-4"><label class="form-label">Payment method</label><select class="form-select" name="payment_method" required><option value="cash">Cash</option><option value="card">Card</option><option value="transfer">Bank Transfer</option></select></div>
                 <div class="mb-4"><label class="form-label">Reference (optional)</label><input type="text" class="form-control" name="reference" maxlength="100" placeholder="Receipt / transaction reference"></div>
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             form.reset();
             document.getElementById('payment_invoice_id').value = button.dataset.id;
             document.getElementById('paymentInvoiceLabel').textContent = '#' + button.dataset.id;
-            document.getElementById('paymentBalance').textContent = balance.toFixed(2) + ' AED';
+            document.getElementById('paymentBalance').textContent = balance.toFixed(2) + ' USD';
             amount.value = balance.toFixed(2);
             amount.max = balance.toFixed(2);
             error.classList.add('d-none');
