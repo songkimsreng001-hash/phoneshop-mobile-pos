@@ -25,15 +25,20 @@ class ClaimController extends Controller
 
     public function getClaimsByShop(Request $request, $shop_id)
     {
-        // Shop users may only pull claims for their own shop. Admin and
-        // superadmin (set by PanelAuthMiddleware on the api.php route) are
-        // allowed to look up any shop, matching the panel-level access
-        // they already have via routes/admin.php and routes/superadmin.php.
+        // Shop users may only pull their own claims; admins may only pull
+        // claims for shops assigned to them; superadmins may access all shops.
         $panelRole = $request->attributes->get('panel_role');
-        $shopUser = Auth::guard('web')->user();
 
-        if (($panelRole === 'shop' || ($panelRole === null && $shopUser)) && $shopUser) {
-            if ((int) $shop_id !== (int) $shopUser->id) {
+        if ($panelRole === 'shop') {
+            $shopUser = Auth::guard('web')->user();
+            if (!$shopUser || (int) $shop_id !== (int) $shopUser->id) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        }
+
+        if ($panelRole === 'admin') {
+            $admin = Auth::guard('admin')->user();
+            if (!$admin || !$admin->canAccessShop((int) $shop_id)) {
                 return response()->json(['message' => 'Forbidden.'], 403);
             }
         }

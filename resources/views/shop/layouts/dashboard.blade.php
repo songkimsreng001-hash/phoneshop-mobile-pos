@@ -1,289 +1,165 @@
 @extends('shop.layouts.main')
-@section('page_title', 'Dashboard Screen')
+
+@section('page_title', 'Dashboard')
 
 @section('header_styles')
-
-    <!--begin::Page Vendor Stylesheets(used by this page)-->
-    <link href="{{asset('admin/assets/plugins/custom/datatables/datatables.bundle.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('admin/assets/plugins/custom/vis-timeline/vis-timeline.bundle.css')}}" rel="stylesheet" type="text/css" />
-    <!--end::Page Vendor Stylesheets-->
+<style>
+    .dashboard-shell { max-width: 1500px; margin: 0 auto; }
+    .welcome-card { background: linear-gradient(135deg, #19a84c 0%, #2dbc62 100%); border-radius: 18px; color: #fff; overflow: hidden; position: relative; }
+    .welcome-card:after { content: ''; position: absolute; width: 240px; height: 240px; border-radius: 50%; right: -80px; top: -100px; background: rgba(255,255,255,.10); }
+    .stat-card, .panel-card { border: 0; border-radius: 16px; box-shadow: 0 5px 24px rgba(20,40,30,.06); }
+    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display:flex; align-items:center; justify-content:center; background:#eef9f1; color:#19a84c; }
+    .chart-bar { border-radius: 7px 7px 2px 2px; background: #20ae52; min-height: 6px; }
+    .chart-track { height: 160px; display:flex; align-items:flex-end; gap:12px; }
+    .chart-column { flex:1; height:100%; display:flex; align-items:flex-end; }
+    .chart-label { font-size: .75rem; color:#8a9690; text-align:center; margin-top:8px; }
+    .payment-donut { width: 150px; height: 150px; border-radius:50%; background: conic-gradient(#19a84c 0 var(--paid-ratio), #f5b83d var(--paid-ratio) 100%); position:relative; }
+    .payment-donut:after { content:''; position:absolute; inset:28px; border-radius:50%; background:#fff; }
+    .payment-donut span { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:1; font-weight:700; font-size:1.3rem; }
+    .status-dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:6px; }
+    .table > :not(caption) > * > * { padding-top: .9rem; padding-bottom: .9rem; }
+</style>
 @endsection
-
-@section('header_scripts')
-
-@endsection
-@php
-    $productsCount = isset($products) ? count($products) : 0;
-    $salesCount = isset($salesCount) ? $salesCount : 0;
-    $purchasesCount = isset($purchasesCount) ? $purchasesCount : 0;
-    $stockValue = isset($stockValue) ? $stockValue : 0;
-    $monthlySales = isset($monthlySales) ? $monthlySales : 0;
-@endphp
-
 
 @section('content')
-
-
-    <!--begin::Toolbar-->
-    <div class="toolbar py-5 py-lg-5" id="kt_toolbar">
-        <!--begin::Container-->
-        <div id="kt_toolbar_container" class="container-xxl d-flex flex-stack flex-wrap">
-            <!--begin::Page title-->
-            <div class="page-title d-flex flex-column me-3">
-                <!--begin::Title-->
-                <h1 class="d-flex text-dark fw-bolder my-1 fs-3">Dashboard</h1>
-                <!--end::Title-->
-            </div>
-            <!--end::Page title-->
-
+<div class="dashboard-shell">
+    <div class="welcome-card p-7 mb-6">
+        <div class="position-relative" style="z-index:2;">
+            <div class="text-white-50 mb-2">{{ now()->format('l, d F Y') }}</div>
+            <h1 class="text-white fw-bold mb-2">Good morning, {{ $user->name }}!</h1>
+            <div class="text-white opacity-75">Here is your shop's sales, inventory and payment overview.</div>
         </div>
-        <!--end::Container-->
     </div>
-    <!--end::Toolbar-->
-    <!--begin::Container-->
-    <div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-xxl">
-        <!--begin::Post-->
-        <div class="content flex-row-fluid" id="kt_content">
 
-            <!--begin::Row-->
-            <div class="row g-5 g-xl-10">
-                <!--begin::Col-->
-                <div class="col-xl-12 mb-5 mb-xl-10">
-                    <!--begin::Lists Widget 19-->
-                    <div class="card card-flush h-xl-100">
-                        <!--begin::Heading-->
-                        <div class="card-header justify-content-center rounded bgi-no-repeat bgi-size-cover bgi-position-y-bottom bgi-position-x-center align-items-start h-250px" style="background-image:url('{{asset("admin/assets/media/patterns/pattern-1.jpg")}}')">
-                            <!--begin::Title-->
-                            <h3 class="card-title align-items-start flex-column text-white pt-15 mb-10 text-center ">
-                                <span class="d-block fs-2x fw-bolder mb-3 w-100">Hello, {{auth('web')->user()->name}}</span>
-                                <div class="d-block fs-3tx text-white mb-3 w-100">
-                                    Welcome To Dashboard
-                                </div>
-                            </h3>
-                            <!--end::Title-->
+    <div class="row g-5 mb-6">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-5 h-100">
+                <div class="d-flex justify-content-between align-items-start"><div class="stat-icon"><i class="fas fa-shopping-cart"></i></div><span class="badge bg-light-success text-success">Sales</span></div>
+                <div class="fs-2x fw-bold mt-5">{{ number_format($salesCount) }}</div>
+                <div class="text-muted">Completed invoices</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-5 h-100">
+                <div class="d-flex justify-content-between align-items-start"><div class="stat-icon"><i class="fas fa-box"></i></div><span class="badge bg-light-info text-info">Stock</span></div>
+                <div class="fs-2x fw-bold mt-5">{{ number_format($stockUnits) }}</div>
+                <div class="text-muted">Units in inventory</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-5 h-100">
+                <div class="d-flex justify-content-between align-items-start"><div class="stat-icon"><i class="fas fa-users"></i></div><span class="badge bg-light-primary text-primary">Customers</span></div>
+                <div class="fs-2x fw-bold mt-5">{{ number_format($customersCount) }}</div>
+                <div class="text-muted">Customers with purchases</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-5 h-100">
+                <div class="d-flex justify-content-between align-items-start"><div class="stat-icon"><i class="fas fa-coins"></i></div><span class="badge bg-light-warning text-warning">Revenue</span></div>
+                <div class="fs-2x fw-bold mt-5">{{ number_format($monthlyRevenue, 2) }} USD</div>
+                <div class="text-muted">Revenue this month</div>
+            </div>
+        </div>
+    </div>
 
-                        </div>
-                        <!--end::Heading-->
-                        <!--begin::Body-->
-                        <div class="card-body mt-n10">
-                            <!--begin::Stats-->
-                            <div class="mt-n20 position-relative">
-                                <!--begin::Row-->
-                                <div class="row g-3 g-lg-6 justify-content-center">
-                                    <div class="col-md-3">
-                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="symbol symbol-30px me-5 mb-8">
-                                                    <span class="symbol-label"><span class="fs-2qx fas fa-box text-primary"></span></span>
-                                                </div>
-                                                <div class="symbol me-5 mb-8">
-                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$productsCount}}</span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-10">
-                                                <span class="text-gray-700 fw-bold fs-2">Products</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="symbol symbol-30px me-5 mb-8">
-                                                    <span class="symbol-label"><span class="fs-2qx fas fa-receipt text-success"></span></span>
-                                                </div>
-                                                <div class="symbol me-5 mb-8">
-                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$salesCount}}</span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-10">
-                                                <span class="text-gray-700 fw-bold fs-2">Sales</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="symbol symbol-30px me-5 mb-8">
-                                                    <span class="symbol-label"><span class="fs-2qx fas fa-truck text-info"></span></span>
-                                                </div>
-                                                <div class="symbol me-5 mb-8">
-                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$purchasesCount}}</span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-10">
-                                                <span class="text-gray-700 fw-bold fs-2">Purchases</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5 ">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="symbol symbol-30px me-5 mb-8">
-                                                    <span class="symbol-label"><span class="fs-2qx fas fa-warehouse text-warning"></span></span>
-                                                </div>
-                                                <div class="symbol me-5 mb-8">
-                                                    <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{$stockValue}}</span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-10">
-                                                <span class="text-gray-700 fw-bold fs-2">Stock Qty</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row g-3 g-lg-6 mt-5 justify-content-center">
-                                    <div class="col-md-6">
-                                        <div class="bg-white rounded-2 border p-6">
-                                            <h5 class="fw-bold mb-3">This Month</h5>
-                                            <p class="text-muted mb-0">Monthly sales: <strong>${{ number_format($monthlySales, 2) }}</strong></p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="bg-white rounded-2 border p-6">
-                                            <h5 class="fw-bold mb-3">Shop Scope</h5>
-                                            <p class="text-muted mb-0">You can manage only your own shop data.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!--end::Row-->
-                            </div>
-                            <!--end::Stats-->
-                        </div>
-                        <!--end::Body-->
-                    </div>
-                    <!--end::Lists Widget 19-->
+    <div class="row g-5 mb-6">
+        <div class="col-xl-8">
+            <div class="card panel-card h-100">
+                <div class="card-header border-0 pt-6">
+                    <div><h3 class="card-title fw-bold mb-1">Sales overview</h3><div class="text-muted">Revenue for the last six months</div></div>
+                    <a href="{{ route('shop.invoices.index') }}" class="btn btn-sm btn-light-success">View invoices</a>
                 </div>
-                <!--end::Col-->
-
+                <div class="card-body pt-3">
+                    <div class="chart-track">
+                    @foreach($monthlyChart as $month)
+                        <div class="chart-column" title="{{ number_format($month['amount'], 2) }} USD">
+                            <div class="chart-bar w-100" style="height: {{ max(($month['amount'] / $maxChart) * 100, 4) }}%"></div>
+                        </div>
+                    @endforeach
+                    </div>
+                    <div class="d-flex gap-3">
+                        @foreach($monthlyChart as $month)<div class="flex-fill chart-label">{{ $month['label'] }}</div>@endforeach
+                    </div>
+                    <div class="d-flex justify-content-between mt-6 p-4 rounded bg-light-success">
+                        <div><div class="text-muted fs-7">Monthly revenue</div><strong class="fs-4">{{ number_format($monthlyRevenue, 2) }} USD</strong></div>
+                        <div class="text-end"><div class="text-muted fs-7">Collected this month</div><strong class="fs-4">{{ number_format($monthlyPaid, 2) }} USD</strong></div>
+                    </div>
+                </div>
             </div>
-            <!--end::Row-->
-
-
-
         </div>
-        <!--end::Post-->
+
+        <div class="col-xl-4">
+            <div class="card panel-card h-100">
+                <div class="card-header border-0 pt-6"><div><h3 class="card-title fw-bold mb-1">Payment status</h3><div class="text-muted">Current collection position</div></div></div>
+                <div class="card-body pt-2">
+                    @php
+                        $paidRatio = $revenue > 0 ? min(max((($revenue - $outstanding) / $revenue) * 100, 0), 100) : 0;
+                    @endphp
+                    <div class="d-flex justify-content-center mb-5"><div class="payment-donut" style="--paid-ratio: {{ $paidRatio }}%"><span>{{ number_format($paidRatio, 0) }}%</span></div></div>
+                    <div class="d-flex justify-content-between mb-3"><span><span class="status-dot" style="background:#19a84c"></span>Paid</span><strong>{{ number_format($monthlyPaid, 2) }} USD</strong></div>
+                    <div class="d-flex justify-content-between mb-3"><span><span class="status-dot" style="background:#f5b83d"></span>Outstanding</span><strong>{{ number_format($outstanding, 2) }} USD</strong></div>
+                    <div class="d-flex justify-content-between"><span><span class="status-dot" style="background:#22a9df"></span>Products</span><strong>{{ number_format($productsCount) }}</strong></div>
+                    <div class="border-top mt-4 pt-4">
+                        <div class="text-muted fs-7 mb-3">Collected by method</div>
+                        @foreach(['cash' => 'Cash', 'card' => 'Card', 'transfer' => 'Transfer', 'mixed' => 'Mixed'] as $method => $label)
+                            @if($paymentMethods->has($method))
+                                <div class="d-flex justify-content-between mb-2"><span>{{ $label }}</span><strong>{{ number_format($paymentMethods[$method]->amount, 2) }} USD</strong></div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <a href="{{ route('shop.payments.index') }}" class="btn btn-success w-100 mt-5">Manage payments</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <!--end::Container-->
 
+    <div class="row g-5 mb-6">
+        <div class="col-xl-8">
+            <div class="card panel-card">
+                <div class="card-header border-0 pt-6"><h3 class="card-title fw-bold">Recent invoices</h3></div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead><tr><th>Invoice</th><th>Customer</th><th>Total</th><th>Payment</th><th>Date</th></tr></thead>
+                            <tbody>
+                            @forelse($recentInvoices as $invoice)
+                                <tr>
+                                    <td class="fw-bold">#{{ $invoice->id }}</td>
+                                    <td>{{ $invoice->customer_name ?: ($invoice->customer?->name ?: 'Walk-in customer') }}</td>
+                                    <td>{{ number_format($invoice->final_bill, 2) }} USD</td>
+                                    <td><span class="badge {{ $invoice->payment_status === 'paid' ? 'bg-light-success text-success' : 'bg-light-warning text-warning' }}">{{ ucfirst($invoice->payment_status) }}</span></td>
+                                    <td class="text-muted">{{ $invoice->created_at?->format('d M, h:i A') }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5" class="text-center text-muted py-8">No invoices yet.</td></tr>
+                            @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card panel-card h-100">
+                <div class="card-header border-0 pt-6"><h3 class="card-title fw-bold">Low stock</h3><span class="badge bg-light-danger text-danger">{{ $lowStockCount }}</span></div>
+                <div class="card-body pt-0">
+                @forelse($lowStockProducts as $product)
+                    <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                        <div><div class="fw-bold">{{ $product->name }}</div><div class="text-muted fs-7">Reorder at {{ $product->reorder_level }}</div></div>
+                        <span class="badge bg-light-danger text-danger">{{ $product->qty }} left</span>
+                    </div>
+                @empty
+                    <div class="text-center text-muted py-8">Stock levels look good.</div>
+                @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
 
-@endsection
-
-
-
-
-@section('footer_modals')
-
-@endsection
-
-@section('footer_scripts')
-
-    <!--begin::Page Custom Javascript(used by this page)-->
-    <script src="{{asset('admin/assets/js/widgets.bundle.js')}}"></script>
-    <script src="{{asset('admin/assets/js/custom/widgets.js')}}"></script>
-    <!--end::Page Custom Javascript-->
-
-    <!--begin::Page Vendors Javascript(used by this page)-->
-    <script src="{{asset('admin/assets/plugins/custom/datatables/datatables.bundle.js')}}"></script>
-    <script src="{{asset('admin/assets/plugins/custom/vis-timeline/vis-timeline.bundle.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/index.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/geodata/worldLow.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/geodata/continentsLow.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/geodata/usaLow.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/geodata/worldTimeZonesLow.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/themes/Animated.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/xy.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/percent.js')}}"></script>
-    <script src="{{url('https://cdn.amcharts.com/lib/5/radar.js')}}"></script>
-    <!--end::Page Vendors Javascript-->
-
-    <script>
-        @if($message = Session::get('success'))
-        Swal.fire({
-            text: "{{$message}}",
-            icon: "success",
-            buttonsStyling: false,
-            showConfirmButton: false,
-            timer: 2800
-        });
-        @endif
-        @if($message = Session::get('error'))
-        Swal.fire({
-            text: "{{$message}}",
-            icon: "error",
-            buttonsStyling: false,
-            confirmButtonText: "Ok, got it!",
-            customClass: {
-                confirmButton: "btn btn-primary"
-            }
-        });
-        @endif
-    </script>
-
-
-    <script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
-    <!-- Chart code -->
-    <script>
-        am5.ready(function() {
-
-// Create root element
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
-            var root = am5.Root.new("chartdiv");
-
-// Set themes
-// https://www.amcharts.com/docs/v5/concepts/themes/
-            root.setThemes([
-                am5themes_Animated.new(root)
-            ]);
-
-            var data = {
-                value: 0,
-                children: []
-            };
-
-
-// Create wrapper container
-            var container = root.container.children.push(am5.Container.new(root, {
-                width: am5.percent(100),
-                height: am5.percent(100),
-                layout: root.verticalLayout
-            }));
-
-// Create series
-// https://www.amcharts.com/docs/v5/charts/hierarchy/#Adding
-            var series = container.children.push(am5hierarchy.ForceDirected.new(root, {
-                singleBranchOnly: false,
-                downDepth: 3,
-                topDepth: 1,
-                initialDepth: 0,
-                valueField: "value",
-                categoryField: "name",
-                childDataField: "children",
-                idField: "name",
-                linkWithField: "linkWith",
-                manyBodyStrength: -10,
-                centerStrength: 0.5,
-            }));
-
-            series.get("colors").setAll({
-                step: 6
-            });
-
-            series.links.template.set("strength", 0.5);
-
-            series.data.setAll([data]);
-
-            series.set("selectedDataItem", series.dataItems[0]);
-// Make stuff animate on load
-            series.appear(1000, 100);
-
-        }); // end am5.ready()
-
-    </script>
-
-
+    <div class="row g-5">
+        <div class="col-xl-4"><div class="card panel-card p-5"><div class="text-muted">Outstanding payments</div><div class="fs-2x fw-bold text-danger mt-2">{{ number_format($outstanding, 2) }} USD</div><a href="{{ route('shop.payments.index') }}" class="btn btn-light-danger mt-4">Collect payments</a></div></div>
+        <div class="col-xl-4"><div class="card panel-card p-5"><div class="text-muted">Products</div><div class="fs-2x fw-bold mt-2">{{ number_format($productsCount) }}</div><div class="text-muted mt-2">{{ number_format($lowStockCount) }} need restocking</div></div></div>
+        <div class="col-xl-4"><div class="card panel-card p-5"><div class="text-muted">Purchases</div><div class="fs-2x fw-bold mt-2">{{ number_format($purchasesCount) }}</div><div class="text-muted mt-2">Recorded purchase orders</div></div></div>
+    </div>
+</div>
 @endsection

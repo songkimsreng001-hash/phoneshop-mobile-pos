@@ -94,7 +94,7 @@
                                         </span>
                                     </div>
                                     <div class="symbol me-5 mb-8">
-                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesThisMonth, 2) }} <span class="fs-6">AED</span></span>
+                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesThisMonth, 2) }} <span class="fs-6">USD</span></span>
                                     </div>
                                 </div>
                                 <div class="mt-10">
@@ -113,7 +113,7 @@
                                         </span>
                                     </div>
                                     <div class="symbol me-5 mb-8">
-                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesTillNow, 2) }} <span class="fs-6">AED</span></span>
+                                        <span class="text-dark fw-boldest d-block fs-2qx lh-1 mb-1">{{ number_format($totalSalesTillNow, 2) }} <span class="fs-6">USD</span></span>
                                     </div>
                                 </div>
                                 <div class="mt-10">
@@ -138,6 +138,8 @@
                                     <th>Total Bill</th>
                                     <th>Discount</th>
                                     <th>Final Bill</th>
+                                    <th>Paid</th>
+                                    <th>Payment</th>
                                     <th>Customer Name</th>
                                     <th>Customer Phone</th>
                                     <th>Created At</th>
@@ -150,7 +152,9 @@
                                     <td>{{ $invoice->id }}</td>
                                     <td>{{ $invoice->total_bill }}</td>
                                     <td>{{ $invoice->discount }}</td>
-                                    <td>{{ $invoice->final_bill }}</td>
+                                    <td>{{ number_format($invoice->final_bill, 2) }}</td>
+                                    <td>{{ number_format($invoice->amount_paid, 2) }}</td>
+                                    <td><span class="badge {{ $invoice->payment_status === 'paid' ? 'bg-light-success text-success' : 'bg-light-warning text-warning' }}">{{ ucfirst($invoice->payment_status) }}</span></td>
                                     <td>{{ $invoice->customer_name ? $invoice->customer_name : 'N/A' }}</td>
                                     <td>{{ $invoice->customer_phone ? $invoice->customer_phone : 'N/A' }}</td>
                                     <td>@if($invoice->created_at)
@@ -167,7 +171,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8">No invoices available</td>
+                                    <td colspan="10">No invoices available</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -227,10 +231,9 @@
         <hr>
         
         <!-- CORRECTED TOTALS SECTION -->
-        <h3 class="text-end">Total: <span id="print_total">0</span> AED</h3>
-        <h3 class="text-end">Including 5% Tax: <span id="print_tax">0</span> AED</h3>
-        <h3 class="text-end">Discount: <span id="print_discount">0</span> AED</h3>
-        <h3 class="text-end">Final Total: <span id="print_invoice_total">0</span> AED</h3>
+        <h3 class="text-end">Total: <span id="print_total">0</span> USD</h3>
+        <h3 class="text-end">Discount: <span id="print_discount">0</span> USD</h3>
+        <h3 class="text-end">Final Total: <span id="print_invoice_total">0</span> USD</h3>
         
         <div class="text-center">
             <p>Thank you for shopping with us!</p>
@@ -292,9 +295,11 @@
                             <thead><tr><th>Product</th><th>Quantity</th><th>Price</th><th>Total</th></tr></thead>
                             <tbody>${productsHtml}</tbody>
                         </table>
-                        <h4>Total: ${parseFloat(invoice.total_bill).toFixed(2)} AED</h4>
-                        <h4>Discount: ${parseFloat(invoice.discount).toFixed(2)} AED</h4>
-                        <h4>Final Total: ${parseFloat(invoice.final_bill).toFixed(2)} AED</h4>
+                        <h4>Total: ${parseFloat(invoice.total_bill).toFixed(2)} USD</h4>
+                        <h4>Discount: ${parseFloat(invoice.discount).toFixed(2)} USD</h4>
+                        <h4>Final Total: ${parseFloat(invoice.final_bill).toFixed(2)} USD</h4>
+                        <h4>Paid: ${parseFloat(invoice.amount_paid || 0).toFixed(2)} USD</h4>
+                        <h4>Payment: ${(invoice.payment_method || 'cash').replace('_', ' ')}</h4>
                     `;
                     
                     // Show the modal and update print preview
@@ -338,10 +343,7 @@
             const totalBill = parseFloat(currentInvoice.total_bill);
             const discount = parseFloat(currentInvoice.discount);
             const finalBill = parseFloat(currentInvoice.final_bill);
-            const taxAmount = totalBill * 0.05;
-
             document.getElementById('print_total').textContent = totalBill.toFixed(2);
-            document.getElementById('print_tax').textContent = taxAmount.toFixed(2);
             document.getElementById('print_discount').textContent = discount.toFixed(2);
             document.getElementById('print_invoice_total').textContent = finalBill.toFixed(2);
         }

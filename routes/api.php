@@ -15,7 +15,7 @@ Route::middleware('panel.auth:shop')->group(function () {
 // Shared: any logged-in panel can read invoice/claim data, but the
 // controllers enforce that shop users only ever see their own records.
 Route::middleware('panel.auth:shop,admin,superadmin')->group(function () {
-    Route::get('/invoice/{id}/details', [InvoiceController::class, 'getInvoiceDetails'])->name('shop.invoices.details');
+    Route::get('/invoice/{id}/details', [InvoiceController::class, 'getInvoiceDetails'])->name('api.invoices.details');
     Route::get('/warranty/invoice/{id}', [InvoiceController::class, 'getInvoiceDetailsWithWarranty']);
     Route::get('/claims/{shop_id}', [ClaimController::class, 'getClaimsByShop']);
 });

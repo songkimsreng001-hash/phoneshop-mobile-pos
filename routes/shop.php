@@ -11,6 +11,7 @@ use App\Http\Controllers\Shop\InvoiceController;
 use App\Http\Controllers\Shop\WarrantyController;
 use App\Http\Controllers\Shop\ClaimController;
 use App\Http\Controllers\Shop\CategoryController;
+use App\Http\Controllers\Shop\PaymentController;
 
 Route::controller(LoginController::class)->group(function () {
     Route::get('/', 'index')->name('shop.home');
@@ -35,6 +36,8 @@ Route::group(['middleware' => 'user'], function () {
     Route::get('warranty', [WarrantyController::class, 'index'])->name('shop.warranty.show');
     Route::get('claims', [ClaimController::class, 'index'])->name('shop.claims.show');
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('shop.invoices.index');
+    Route::get('/payments', [PaymentController::class, 'index'])->name('shop.payments.index');
+    Route::post('/payments', [PaymentController::class, 'store'])->name('shop.payments.store');
     Route::get('/invoices/{id}/details', [InvoiceController::class, 'getInvoiceDetails'])->name('shop.invoices.details');
     Route::get('/invoices/{id}/details-with-warranty', [InvoiceController::class, 'getInvoiceDetailsWithWarranty'])->name('shop.invoices.detailsWithWarranty');
 

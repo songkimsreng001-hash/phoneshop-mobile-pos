@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('page_title', 'Dashboard')</title>
+    <title>@yield('page_title', 'Dashboard') | Mobile Shop POS</title>
     <link rel="shortcut icon" href="{{ asset('admin/assets/media/logos/favicon.ico') }}" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
     <link href="{{ asset('admin/assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
@@ -21,10 +21,13 @@
                 </div>
                 <div class="p-4">
                     <ul class="nav flex-column gap-2">
-                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ url('/shop/dashboard') }}">Dashboard</a></li>
-                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ url('/shop/inventory') }}">Inventory</a></li>
-                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ url('/shop/pos') }}">POS</a></li>
-                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ url('/shop/invoices') }}">Invoices</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.dashboard') }}"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.pos.show') }}"><i class="fas fa-cash-register me-2"></i>POS</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.invoices.index') }}"><i class="fas fa-file-invoice me-2"></i>Invoices</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.payments.index') }}"><i class="fas fa-credit-card me-2"></i>Payments</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.inventory.show') }}"><i class="fas fa-boxes me-2"></i>Inventory</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.customers.index') }}"><i class="fas fa-users me-2"></i>Customers</a></li>
+                        <li><a class="nav-link px-3 py-2 rounded text-dark" href="{{ route('shop.claims.show') }}"><i class="fas fa-shield-alt me-2"></i>Claims</a></li>
                     </ul>
                 </div>
             </aside>

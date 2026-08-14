@@ -43,25 +43,29 @@ class InvoiceController extends Controller
 
     public function getInvoiceDetails(Request $request, $id)
     {
-        // Fetch the invoice by its ID, including related sales and products
-        $invoice = Invoice::with('sales.product')->findorFail($id);
+        $invoice = Invoice::with(['sales.product', 'customer'])->findOrFail($id);
 
-        // Shop users may only view invoices that belong to their own shop.
-        // Admin/superadmin (resolved by PanelAuthMiddleware on the api.php
-        // routes) are not restricted here. When this method is hit via the
-        // shop.php web route (no panel_role attribute set), fall back to
-        // checking the logged-in shop session directly.
-        $panelRole = $request->attributes->get('panel_role');
-        $shopUser = Auth::guard('web')->user();
-
-        if (($panelRole === 'shop' || ($panelRole === null && $shopUser)) && $shopUser) {
-            if ((int) $invoice->shop_id !== (int) $shopUser->id) {
-                return response()->json(['message' => 'Forbidden.'], 403);
-            }
+        if (!$this->canViewInvoice($request, $invoice)) {
+            return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        // Return the invoice data with sales and products
         return response()->json($invoice);
+    }
+
+    private function canViewInvoice(Request $request, Invoice $invoice): bool
+    {
+        $panelRole = $request->attributes->get('panel_role');
+
+        if ($panelRole === 'superadmin') {
+            return true;
+        }
+
+        if ($panelRole === 'admin') {
+            return Auth::guard('admin')->user()?->canAccessShop((int) $invoice->shop_id) ?? false;
+        }
+
+        $shopUser = Auth::guard('web')->user();
+        return $shopUser ? (int) $invoice->shop_id === (int) $shopUser->id : false;
     }
 
     /**
@@ -127,21 +131,10 @@ class InvoiceController extends Controller
 
     public function getInvoiceDetailsWithWarranty(Request $request, $id)
     {
-        // Fetch the invoice by its ID, including related sales and products
         $invoice = Invoice::with('sales.product')->findOrFail($id);
-    
-        if (!$invoice) {
-            return response()->json(['message' => 'Invoice not found'], 404);
-        }
 
-        // Shop users may only view warranty details for their own invoices.
-        $panelRole = $request->attributes->get('panel_role');
-        $shopUser = Auth::guard('web')->user();
-
-        if (($panelRole === 'shop' || ($panelRole === null && $shopUser)) && $shopUser) {
-            if ((int) $invoice->shop_id !== (int) $shopUser->id) {
-                return response()->json(['message' => 'Forbidden.'], 403);
-            }
+        if (!$this->canViewInvoice($request, $invoice)) {
+            return response()->json(['message' => 'Forbidden.'], 403);
         }
 
         // Current date for warranty validation
