@@ -57,6 +57,8 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'manage_admins',         'display_name' => 'Manage Admins',            'group' => 'admin'],
             ['name' => 'manage_roles',          'display_name' => 'Manage Roles & Permissions','group' => 'admin'],
             ['name' => 'manage_shops',          'display_name' => 'Manage Shops',             'group' => 'admin'],
+            ['name' => 'manage_staff',          'display_name' => 'Manage Shop Staff',        'group' => 'admin'],
+            ['name' => 'manage_settings',       'display_name' => 'Manage System Settings',   'group' => 'admin'],
         ];
 
         foreach ($permissions as $perm) {
@@ -71,6 +73,27 @@ class RolesAndPermissionsSeeder extends Seeder
                 'description'  => 'Full access to everything',
                 'is_system'    => true,
                 'permissions'  => Permission::all()->pluck('name')->toArray(), // All permissions
+            ],
+            [
+                // Matches the "Admin" tier: full CRUD on catalog/orders/staff/customers
+                // and reports, but explicitly barred from manage_admins, manage_roles,
+                // and manage_settings (those stay Super-Admin-only).
+                'name'         => 'admin',
+                'display_name' => 'Admin',
+                'description'  => 'Runs day-to-day operations but cannot manage other admins or system settings',
+                'is_system'    => true,
+                'permissions'  => [
+                    'view_dashboard',
+                    'view_products', 'create_products', 'edit_products', 'delete_products',
+                    'manage_brands', 'manage_categories', 'manage_suppliers',
+                    'view_stock', 'adjust_stock',
+                    'view_purchases', 'create_purchases', 'edit_purchases', 'delete_purchases',
+                    'view_sales', 'create_sales', 'void_sales',
+                    'view_customers', 'manage_customers',
+                    'manage_staff', 'manage_shops',
+                    'view_reports', 'export_reports',
+                    'view_claims', 'manage_claims',
+                ],
             ],
             [
                 'name'         => 'shop_manager',

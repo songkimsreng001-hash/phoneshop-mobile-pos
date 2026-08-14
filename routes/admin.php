@@ -39,7 +39,7 @@ Route::group(['middleware' => 'admin'], function () {
     Route::controller(InventoryController::class)->group(function () {
         Route::get('/shops/{shop_id}/inventory', 'index')->name('admin.inventory.show');
         Route::post('shops/storeProduct', 'storeProduct')->name('admin.shops.products.store');
-        Route::post('shops/deleteProduct', 'delete')->name('admin.shops.products.delete');
+        Route::post('shops/deleteProduct', 'delete')->name('admin.shops.products.delete')->middleware('permission:delete_products');
         Route::post('shops/updateProduct', 'updateProduct')->name('admin.shops.products.update');
     });
 
@@ -65,7 +65,7 @@ Route::group(['middleware' => 'admin'], function () {
         Route::get('/shops/{shop_id}/products', 'index')->name('admin.products.index');
         Route::post('/shops/products/store', 'store')->name('admin.products.store');
         Route::post('/shops/products/update', 'update')->name('admin.products.update');
-        Route::delete('/shops/products/{id}', 'destroy')->name('admin.products.destroy');
+        Route::delete('/shops/products/{id}', 'destroy')->name('admin.products.destroy')->middleware('permission:delete_products');
     });
 
     Route::controller(StockController::class)->group(function () {

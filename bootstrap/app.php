@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin'      => \App\Http\Middleware\AdminMiddleware::class,
             'superadmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
             'panel.auth' => \App\Http\Middleware\PanelAuthMiddleware::class,
+            'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
