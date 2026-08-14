@@ -9,6 +9,12 @@ services:
     container_name: mobile-shop-app
     restart: unless-stopped
     working_dir: /var/www/html
+    command: >
+      /bin/sh -c "
+      chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/vendor || true;
+      chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/vendor || true;
+      php-fpm
+      "
 
     volumes:
       - ./:/var/www/html
